@@ -1,0 +1,83 @@
+# ── Node / TypeScript ───────────────────────────────
+node_modules/
+.pnp.*
+.yarn/
+.next/
+out/
+dist/
+build/
+*.tsbuildinfo
+.turbo/
+.vercel/
+
+# ── Python ──────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.pytype/
+.coverage
+.coverage.*
+htmlcov/
+*.egg-info/
+*.egg
+pip-wheel-metadata/
+
+# ── Env / secrets ───────────────────────────────────
+.env
+.env.local
+.env.*.local
+.env.production
+.env.development
+.env.test
+!.env.example
+*.pem
+*.key
+*.p12
+
+# ── Logs ────────────────────────────────────────────
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# ── IDE / editor ────────────────────────────────────
+.vscode/*
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+
+# ── OS ──────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Claude Code ─────────────────────────────────────
+.claude/settings.local.json
+.claude/worktrees/
+.claude/agents/
+
+# ── Test artifacts ──────────────────────────────────
+playwright-report/
+test-results/
+coverage/
+.nyc_output/
+
+# ── Project-specific ────────────────────────────────
+supabase/.temp/
+crawls/                 # local crawl HTML snapshots
+.modal-cache/
+*.local
