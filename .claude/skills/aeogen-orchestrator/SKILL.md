@@ -207,7 +207,86 @@ Her invoke'da şu format:
 - Bu cache, orkestratörün **kararlarını** tutar (örn. "Faz 1 T3'te
   Next.js 15.5.x pin'li, neden?" gibi sık çıkan açıklamalar).
 
-## Drift recovery
+## Git workflow integration (yeni: 2026-05-13)
+
+**Repo:** https://github.com/ismwolf/aoecreator
+**Default:** `dev` (active development)
+**Diğer:** `test` (staging), `main` (production)
+**Per-task:** `feature/<n>-<kebab>` (n = task numarası veya faz.alt)
+
+### Task complete sonrası (OTONOM)
+
+1. **Branch check:** Eğer şu an `feature/<n>` üzerindeysen devam et;
+   `dev` üzerindeysen yeni feature branch oluştur:
+   ```bash
+   git checkout -b feature/<faz-no>-<task-slug>
+   ```
+2. **Staged:** `git add <ilgili dosyalar>` (asla `git add .` ile sızma
+   yapma — `.env*`, `.claude/settings.local.json` gibi sızdırma riski)
+3. **Commit (Conventional + Co-Authored-By):**
+   ```bash
+   git commit -m "$(cat <<'EOF'
+   <type>(<scope>): <imperative description, ≤72 char>
+
+   <body — what + why>
+
+   Co-Authored-By: Claude Opus 4.7 <noreply@anthropic.com>
+   EOF
+   )"
+   ```
+4. **Push:** `git push -u origin feature/<n>-<task-slug>`
+5. **Progress update:** `PROGRESS.md`'de task'ı işaretle + logbook
+6. **Devam et** sıradaki task'a — feature branch açık kalır
+
+### Alt-proje / Faz complete sonrası (OTONOM)
+
+1. Feature branch tüm task'ları biter
+2. **PR aç:** `feature/<n>-<task>` → `dev`:
+   ```bash
+   gh pr create --base dev --head feature/<n>-<task> \
+     --title "<type>(<scope>): <task adı>" \
+     --body "<summary + test plan>"
+   ```
+3. PR URL'ini kullanıcıya bildir
+4. **CI varsa:** check'leri bekle
+5. CI yeşilse + (tam otonom modda + dev'e auto-merge protokolü
+   varsa) **otomatik merge**. Aksi halde kullanıcı manuel merger.
+6. PROGRESS.md güncelle: Faz tamam emojisi
+
+### Milestone (faz biter, sonrakine geçilir) sonrası (OTONOM)
+
+1. `dev`'e merge edildikten sonra: `git checkout dev && git pull`
+2. PROGRESS.md güncelle + logbook
+3. Memory'i güncelle (`project_*.md` veya `reference_*.md` ekle)
+4. Sıradaki faza geç (tam otonom)
+
+### test/main'e promotion (MANUEL ONAY)
+
+Bu adımlar **KULLANICI ONAYI** olmadan yapılmaz:
+- `dev` → `test` PR (staging deploy tetikler)
+- `test` → `main` PR (prod deploy tetikler)
+- Tag oluşturma (release)
+- Direct push to main veya test (PR bypass)
+
+Orkestratör bu noktada şunu söyler:
+> "📦 Faz N tamamlandı, `dev` güncel. `test`'e promotion için PR
+> açayım mı? (evet/hayır)"
+
+### Komut alias'ları (orkestratör için)
+
+| İşlem | Bash |
+|---|---|
+| Yeni feature branch | `git checkout -b feature/<n>-<slug>` |
+| Stage selective | `git add <path>` (asla `git add .`) |
+| Conventional commit | HEREDOC ile `git commit -m "..."` |
+| Push feature | `git push -u origin feature/<n>-<slug>` |
+| Open PR to dev | `gh pr create --base dev --head feature/<n>-<slug> --title ... --body ...` |
+| Check PR status | `gh pr status` |
+| Merge PR (sadece dev'e) | `gh pr merge <num> --merge --delete-branch` (CI yeşilse) |
+| Promote to test (MANUEL) | `gh pr create --base test --head dev --title "release: ..."` |
+| Promote to main (MANUEL) | `gh pr create --base main --head test --title "release: v..."` |
+
+### Drift recovery
 
 Eğer implementation sırasında bir sapma fark edersen (master plan §2
 lock-in'inden veya §8 dependency'sinden):

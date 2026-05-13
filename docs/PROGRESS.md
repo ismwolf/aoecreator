@@ -4,13 +4,16 @@
 > güncellenir. Manuel düzenleme yapılırsa orkestratör konfliği fark
 > eder ve kullanıcıya sorar.
 
-**Son güncelleme:** 2026-05-13 (planlama tamamlandı, implementation
-henüz başlamadı)
-**Mevcut faz:** Faz 0 — langchain-master skill (⏳ Pending)
-**Mevcut alt-proje:** —
-**Mevcut task:** —
-**Sıradaki milestone:** Faz 0 complete
-**Toplam ilerleme:** 0 / ~70 task (%0)
+**Son güncelleme:** 2026-05-13 (git init + 3 branch + push + GitHub MCP
+kurulumu tamamlandı; Faz 0 ve Faz 1 A'nın bazı task'ları bitti)
+**Mevcut faz:** Faz 0 — langchain-master skill (⏳ Pending) + Faz 1 A
+(🔄 In progress: T3 sırada)
+**Mevcut alt-proje:** A — Foundation Bootstrap
+**Mevcut task:** A.T3 — pnpm workspace skeleton (sıradaki) **VEYA**
+Faz 0 T1 — langchain-master skill scaffold (bağımsız, paralel
+yapılabilir)
+**Sıradaki milestone:** Faz 0 complete (~1 gün)
+**Toplam ilerleme:** 5 / ~70 task (%7)
 
 ## Faz durumları
 
@@ -60,18 +63,26 @@ geliştirici (insan + AI) için. Production agent DEĞİL.
 **Plan:** Henüz yazılmadı.
 
 Yapılacaklar (high-level master plan §4.A'dan):
-- [ ] T1: `git init` + `.gitignore` (Node + Python) + initial commit
-- [ ] T2: pnpm workspace skeleton (`pnpm-workspace.yaml`, `package.json`)
-- [ ] T3: `apps/web/` Next.js 15 scaffold (App Router, TS strict, Tailwind, shadcn init)
-- [ ] T4: `apps/api/` FastAPI 3.12 scaffold (uv veya poetry, ruff, black, mypy strict)
-- [ ] T5: `packages/shared/` Pydantic + Zod parity schemas (JSON Schema bridge)
-- [ ] T6: `infra/docker-compose.dev.yml` (Postgres + Redis + Adminer)
-- [ ] T7: `supabase/config.toml` + Supabase Cloud projesi link
-- [ ] T8: `@t3-oss/env-nextjs` + `pydantic-settings` env validation
-- [ ] T9: Husky + commitlint + lint-staged
-- [ ] T10: `gitleaks` pre-commit
-- [ ] T11: `.github/workflows/ci.yml` (lint + test + typecheck)
-- [ ] T12: Initial README.md
+- [x] T1: `git init -b dev` + initial commit + push (✅ 2026-05-13)
+- [x] T2: `.gitignore` (Node + Python + IDE + project-specific) (✅ 2026-05-13)
+- [x] T2.1: 3 environment branches (`dev`, `test`, `main`) + push (✅ 2026-05-13)
+- [x] T2.2: GitHub default branch = `dev` (✅ 2026-05-13)
+- [x] T2.3: GitHub MCP user-scope install (✅ 2026-05-13)
+- [ ] T3: pnpm workspace skeleton (`pnpm-workspace.yaml`, `package.json`)
+- [ ] T4: `apps/web/` Next.js 15 scaffold (App Router, TS strict, Tailwind, shadcn init)
+- [ ] T5: `apps/api/` FastAPI 3.12 scaffold (uv veya poetry, ruff, black, mypy strict)
+- [ ] T6: `packages/shared/` Pydantic + Zod parity schemas (JSON Schema bridge)
+- [ ] T7: `infra/docker-compose.dev.yml` (Postgres + Redis + Adminer)
+- [ ] T8: `supabase/config.toml` + Supabase Cloud projesi link
+- [ ] T9: `@t3-oss/env-nextjs` + `pydantic-settings` env validation
+- [ ] T10: Husky + commitlint + lint-staged
+- [ ] T11: `gitleaks` pre-commit
+- [ ] T12: `.github/workflows/ci.yml` (lint + test + typecheck)
+- [ ] T13: Initial README.md
+- [ ] T14: Branch protection rules (manuel GitHub UI):
+  - `main`: PR + 1 approval + require CI + dismiss stale
+  - `test`: PR + require CI
+  - `dev`: require CI checks (when CI exists)
 
 **Verification gate:** `pnpm install` + `pnpm dev` çalışıyor; `cd apps/api && uv run uvicorn main:app --reload` ayağa kalkıyor; `docker compose up` Postgres+Redis sağlıklı; `pnpm test` ve `pnpm typecheck` yeşil; CI bir PR'da geçiyor.
 
@@ -182,6 +193,14 @@ Master plan §4.C'den özet:
 - `C:\Users\iso\.claude\projects\C--aeogenerator\memory\` altında 5 memory dosyası yazıldı
 - Proje CLAUDE.md, PROGRESS.md ve `aeogen-orchestrator` skill kuruldu
 - Tam otonom modu seçildi
+- **GitHub MCP** user scope'da kuruldu (npm `@modelcontextprotocol/server-github`)
+- **Repo:** https://github.com/ismwolf/aoecreator (user: ismwolf, gh auth keyring)
+- **Faz 1 (A) — Foundation bootstrap kısmı başladı:**
+  - ✅ A.T1: `git init -b dev`
+  - ✅ A.T2: `.gitignore` (Node + Python + IDE + project-specific)
+  - ✅ Remote add origin
+  - ✅ İlk commit `22daff1` (11 files, 2487 insertions) + push
+  - ✅ Branch'ler: `dev` (default), `test`, `main` — hepsi push'lu
+  - ✅ GitHub'da default branch `dev` olarak set edildi
 - **Sonraki adım:** Faz 0 — `langchain-master` skill implementation
-  (kullanıcı "continue" veya `Skill(skill="aeogen-orchestrator")` ile
-  tetiklediğinde otomatik başlar)
+  (sonra Faz 1 A.T3 pnpm workspace skeleton)

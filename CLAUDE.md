@@ -78,9 +78,74 @@ authoritative, çelişen öneri yapma.
   (FastAPI), `packages/shared/` (Zod+Pydantic parity), `infra/`,
   `supabase/`, `docs/`
 - **Conventional Commits** + Husky pre-commit + lint-staged
-- **Branch:** `feat/PROJ-<n>-<kebab>`, `fix/...`, `refactor/...`
 - **NEVER** commit secrets — `gitleaks` pre-commit gate
 - **NEVER** auto-run EF/Alembic migration in prod startup
+
+## Git workflow (3 environment branch + feature/*)
+
+**Repo:** https://github.com/ismwolf/aoecreator
+**Default branch:** `dev`
+
+### Branch yapısı
+
+| Branch | Ortam | Koruma | Push politikası |
+|---|---|---|---|
+| `dev` | Development (active) | Direct push İZİNLİ (auto-commit ile) | Her feature/<n> merge edilince |
+| `test` | Staging / QA | PR REQUIRED | Manuel: dev → test PR + onay |
+| `main` | Production | PR REQUIRED + 1 review | Manuel: test → main PR + onay |
+| `feature/<n>-<kebab>` | Per-task | Direct push İZİNLİ | Otonom |
+
+### Promotion akışı (otonom + manuel hibrit)
+
+```
+feature/<n>-<task>  ─── auto commit + push ────► origin/feature/<n>
+        │
+        └─ auto open PR ──────────────────────► dev
+                                                  │
+                                                  ├─ MANUEL onay ─► test
+                                                  │
+                                                  └─ MANUEL onay ─► main (PROD)
+```
+
+### Otonom commit + push politikası (bu sessionda netleştirildi)
+
+Tam otonom orkestratör şunları **OTOMATIK** yapar:
+- `feature/<n>` branch'inde her task complete → Conventional commit + push
+- Alt-proje complete → PR open: `feature/<n>` → `dev`
+- Faz complete → PROGRESS.md güncelle + commit + push to dev
+- Co-Authored-By footer her commit'te zorunlu
+
+Şunlar için **KULLANICI ONAYI** zorunlu (bypass etmez):
+- PR `dev` → `test` (staging deploy tetikler)
+- PR `test` → `main` (prod deploy tetikler)
+- `git push --force`, `git reset --hard`, `git branch -D`
+- `rm -rf` (build/cache dışı)
+- Branch protection rule değişikliği
+- main veya test branch'e direct push (PR atlamak)
+- Tag oluşturma (release tagleri)
+- Stripe / OpenRouter / Supabase secret rotation
+
+### Conventional Commits örnekleri
+
+```
+feat(agents): add Question-Intent Analyzer for FAQ schema
+fix(crawl): handle Cloudflare 403 with proxy fallback
+chore(infra): add docker-compose.dev.yml with Postgres+Redis
+docs(progress): mark Faz 0 task 3 complete
+refactor(api/db): consolidate org+workspace query builders
+test(agents/core): add LLM mock tests for OpenRouter adapter
+```
+
+### İlk kurulum durumu (2026-05-13)
+
+- ✅ Local repo `git init -b dev`
+- ✅ Remote: `origin = https://github.com/ismwolf/aoecreator.git`
+- ✅ 3 branch oluşturuldu ve push'landı (dev, test, main)
+- ✅ Default branch GitHub'da `dev` olarak ayarlandı
+- ⏳ Branch protection rules (kullanıcı GitHub UI'de yapacak):
+  - `main`: PR required, 1 approval, dismiss stale, require CI
+  - `test`: PR required, require CI
+  - `dev`: required CI checks (henüz CI yok, Faz 1'de gelecek)
 
 ## v1 implementation sırası (master plan §8)
 
