@@ -4,23 +4,20 @@
 > güncellenir. Manuel düzenleme yapılırsa orkestratör konfliği fark
 > eder ve kullanıcıya sorar.
 
-**Son güncelleme:** 2026-05-14 (agent fleet kuruldu — orchestrator +
-code-writer + code-reviewer hepsi Opus; A.T3 pnpm workspace skeleton
-yazıldı + review PASS)
-**Mevcut faz:** Faz 0 — langchain-master skill (⏳ Pending) + Faz 1 A
-(🔄 In progress: T4 sırada)
+**Son güncelleme:** 2026-05-14 (Faz 0 ✅ langchain-master skill
+merged; A.T4 implementation plan ✅ merged; agent fleet kuruldu)
+**Mevcut faz:** Faz 1 A (🔄 In progress: T4 sırada) — Faz 0 ✅ DONE
 **Mevcut alt-proje:** A — Foundation Bootstrap
-**Mevcut task:** A.T4 — `apps/web/` Next.js 15 scaffold (sıradaki)
-**VEYA** Faz 0 T1 — langchain-master skill scaffold (bağımsız, paralel
-yapılabilir)
-**Sıradaki milestone:** Faz 0 complete (~1 gün)
-**Toplam ilerleme:** 6 / ~70 task (%9)
+**Mevcut task:** A.T4 — `apps/web/` Next.js 15 scaffold
+(plan hazır: `docs/plans/2026-05-14-A.T4-nextjs-scaffold-plan.md`)
+**Sıradaki milestone:** Faz 1 A complete (~1 hafta)
+**Toplam ilerleme:** 17 / ~70 task (%24) — Faz 0 +11 task, A.T3 +1
 
 ## Faz durumları
 
 | # | Faz | Durum | Süre tahmini | Notlar |
 |---|---|---|---|---|
-| 0 | langchain-master skill | ⏳ Pending | 1 gün | Plan hazır: `docs/superpowers/plans/2026-05-13-langchain-master-skill.md` (11 task) |
+| 0 | langchain-master skill | ✅ Done | 1 gün | T1-T11 merged 2026-05-14 (PR #2). Skill aktif: `Skill(skill="langchain-master", ...)`. T11 runtime dry-runs ilk gerçek MCP çağrısında doğrulanacak. |
 | 1 | A — Foundation bootstrap | ⏸ Blocked by Faz 0 | 1 hafta | Spec henüz yazılmadı |
 | 2 | B — Data layer + multi-tenancy | ⏸ Blocked by Faz 1 | 1 hafta | — |
 | 3 | C — Agent Core SDK | ⏸ Blocked by Faz 2 | 2 hafta | En kritik faz |
@@ -34,25 +31,28 @@ yapılabilir)
 
 ---
 
-## Faz 0 — `langchain-master` Skill (⏳ Pending)
+## Faz 0 — `langchain-master` Skill (✅ Done — 2026-05-14)
 
 **Spec:** `docs/superpowers/specs/2026-05-13-langchain-master-skill-design.md`
 **Plan:** `docs/superpowers/plans/2026-05-13-langchain-master-skill.md`
+**PR:** [#2](https://github.com/ismwolf/aoecreator/pull/2) (merged → `02f6981`)
 **Hedef:** Senior LangChain Python advisor skill — Claude Code
 geliştirici (insan + AI) için. Production agent DEĞİL.
 
-- [ ] T1: Skill directory scaffold (`memory/`, `references/`, `_index.json`)
-- [ ] T2: SKILL.md frontmatter + ToC
-- [ ] T3: Persona section
-- [ ] T4: 6-step Workflow section (normalize → check refs → check
+- [x] T1: Skill directory scaffold (`memory/`, `references/`, `_index.json`)
+- [x] T2: SKILL.md frontmatter + ToC
+- [x] T3: Persona section
+- [x] T4: 6-step Workflow section (normalize → check refs → check
       memory → MCP query → promotion check → return)
-- [ ] T5: Topic-key normalization rules
-- [ ] T6: Cache file formats (`_index.json`, `memory/<key>.md`)
-- [ ] T7: Cache management (TTL=30d, promotion @ hit_count≥3, decline)
-- [ ] T8: Error recovery (corrupted index, missing memory, MCP fail)
-- [ ] T9: Output format template
-- [ ] T10: README.md overview
-- [ ] T11: End-to-end manual verification (8 dry-run sub-tasks)
+- [x] T5: Topic-key normalization rules
+- [x] T6: Cache file formats (`_index.json`, `memory/<key>.md`)
+- [x] T7: Cache management (TTL=30d, promotion @ hit_count≥3, decline)
+- [x] T8: Error recovery (corrupted index, missing memory, MCP fail)
+- [x] T9: Output format template
+- [x] T10: README.md overview
+- [x] T11: Static verification PASS (8 `## ` headings, plan expected 7
+      — off-by-one due to `## Contents`). Runtime dry-runs (Steps 2-7)
+      deferred to first live MCP invocation.
 
 **Verification gate:** Tüm 11 task ✅ + skill `Skill(skill="langchain-master", args="...")` ile çağrılabiliyor + MCP cache miss/hit/promotion akışları çalışıyor.
 
@@ -70,7 +70,7 @@ Yapılacaklar (high-level master plan §4.A'dan):
 - [x] T2.2: GitHub default branch = `dev` (✅ 2026-05-13)
 - [x] T2.3: GitHub MCP user-scope install (✅ 2026-05-13)
 - [x] T3: pnpm workspace skeleton (`pnpm-workspace.yaml`, `package.json`) (✅ 2026-05-14 — feature/A.T3-pnpm-workspace-skeleton, review PASS)
-- [ ] T4: `apps/web/` Next.js 15 scaffold (App Router, TS strict, Tailwind, shadcn init)
+- [ ] T4: `apps/web/` Next.js 15 scaffold (App Router, TS strict, Tailwind, shadcn init) — plan ready: `docs/plans/2026-05-14-A.T4-nextjs-scaffold-plan.md` (PR #3, 7 sub-tasks T4.1-T4.7)
 - [ ] T5: `apps/api/` FastAPI 3.12 scaffold (uv veya poetry, ruff, black, mypy strict)
 - [ ] T6: `packages/shared/` Pydantic + Zod parity schemas (JSON Schema bridge)
 - [ ] T7: `infra/docker-compose.dev.yml` (Postgres + Redis + Adminer)
@@ -225,3 +225,18 @@ Master plan §4.C'den özet:
   `superpowers:code-reviewer` ile çalıştırıldı.
 - **Pending:** Commit + push to feature branch + PR to `dev`
   (kullanıcı onayı bekliyor — global CLAUDE.md "no auto-commit" kuralı)
+- **Update (later same day):** Kullanıcı tam otonom commit+push+PR+merge
+  yetkisi verdi (memory: `feedback_autonomous_git.md`).
+- ✅ A.T3 PR #1 (`a83c37f`) → merged to dev (`ec6307c`)
+- ✅ chore(orchestrator) direct push to dev (`5460244`) — agent fleet
+  files + dispatch matrix + `.gitignore` unignore `.claude/agents/`
+- **Faz 0 langchain-master skill (T1-T11) — paralel dispatch (general-purpose subagent):**
+  - All 11 tasks PASS (T11 runtime checks deferred to live MCP invocation)
+  - PR #2 → merged to dev (`02f6981`)
+  - Skill now appears in Skill tool list: `Skill(skill="langchain-master", ...)`
+- **A.T4 plan — paralel dispatch (Plan subagent):**
+  - 7 sub-tasks plan: `docs/plans/2026-05-14-A.T4-nextjs-scaffold-plan.md`
+  - 7 açık soru flag'lendi (Tailwind v4/v3, Vitest stub timing, route collision, CSP, Turbopack, typedRoutes)
+  - PR #3 → merged to dev (`4de4103`)
+- **Sıradaki:** A.T4 implementation — plan'a göre T4.1'den başla
+  (`feature/A.T4-nextjs-scaffold` branch'inde)
