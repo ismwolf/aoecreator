@@ -79,18 +79,27 @@ Sıradaki task'a göre **en uygun aracı** seç:
 
 | Task tipi | Araç | Çağrı |
 |---|---|---|
+| **Implementation / kod yazımı** | `aeogen-code-writer` agent (Opus) | `Agent(subagent_type="aeogen-code-writer", ...)` |
+| **Post-implement review** | `aeogen-code-reviewer` agent (Opus) | `Agent(subagent_type="aeogen-code-reviewer", ...)` |
+| Orkestrasyon delegasyonu (nadir) | `aeogen-orchestrator` agent (Opus) | `Agent(subagent_type="aeogen-orchestrator", ...)` |
 | Yeni alt-proje için spec yaz | `superpowers:brainstorming` | `Skill(skill="superpowers:brainstorming")` |
 | Spec hazırsa plan yaz | `superpowers:writing-plans` | `Skill(skill="superpowers:writing-plans")` |
-| Plan hazırsa adım adım implement | `superpowers:subagent-driven-development` veya doğrudan Write/Edit | `Skill(...)` veya doğrudan |
+| Plan hazırsa adım adım implement | `aeogen-code-writer` (default) veya `superpowers:subagent-driven-development` | `Agent(...)` veya `Skill(...)` |
 | LangChain/LangGraph/LangSmith sorusu | `langchain-master` skill (Faz 0'da kurulacak) | `Skill(skill="langchain-master", args="<soru>")` |
 | Codebase exploration | `Agent(subagent_type="Explore")` | quick/medium/very thorough breadth |
 | Mimari/plan tasarımı | `Agent(subagent_type="Plan")` | — |
-| Major task post-implement review | `Agent(subagent_type="superpowers:code-reviewer")` | — |
-| Karmaşık çoklu-step | `Agent(subagent_type="general-purpose")` | — |
+| Major task post-implement review (genel) | `aeogen-code-reviewer` (default) veya `Agent(subagent_type="superpowers:code-reviewer")` | — |
+| Karmaşık çoklu-step belirsiz | `Agent(subagent_type="general-purpose")` | — |
 | Debug / failing test | `superpowers:systematic-debugging` | — |
 | Done declare öncesi | `superpowers:verification-before-completion` | — |
 | Pre-commit | `superpowers:requesting-code-review` | — |
-| Doğrudan dosya yazımı (basit task) | Write / Edit | (LLM kendi yazar) |
+| Trivial config / file scaffold | Write / Edit doğrudan | (LLM kendi yazar) |
+
+**Default routing kuralı (2026-05-14'ten beri):** "Bu task implement
+gerektirir mi?" sorusu evet ise **önce `aeogen-code-writer` agent'a
+delege et**, sonra `aeogen-code-reviewer` agent'ı geri kontrol için
+çağır. Bu zincir tam otonom modda otomatik. Her iki agent Opus
+modelinde çalışır.
 
 **Sub-skill seçim kuralı:** "Bu task'ı çözebilecek en küçük, en
 spesifik tool". Brainstorming + writing-plans + implementation üçlüsü
@@ -317,14 +326,17 @@ Yeni skill ihtiyacı çıkarsa Adım 5 ile otomatik yaratırsın.
 
 ## Subagent listesi (mevcut)
 
-| Subagent type | Amaç |
-|---|---|
-| `Explore` | Codebase fast search (quick/medium/very thorough) |
-| `Plan` | Architecture/implementation plan |
-| `general-purpose` | Multi-step complex task |
-| `superpowers:code-reviewer` | Major step post-implement review |
-| `claude-code-guide` | Claude Code/SDK/API soruları |
-| `statusline-setup` | Status line config (proje için relevant değil) |
+| Subagent type | Model | Amaç |
+|---|---|---|
+| `aeogen-orchestrator` | **opus** | Bu orchestrator'ün agent versiyonu (delegated invocation için) |
+| `aeogen-code-writer` | **opus** | aeogen project implementation (default writer) |
+| `aeogen-code-reviewer` | **opus** | aeogen project review (default reviewer, no edit tools) |
+| `Explore` | inherit | Codebase fast search (quick/medium/very thorough) |
+| `Plan` | inherit | Architecture/implementation plan |
+| `general-purpose` | inherit | Multi-step complex unknown task |
+| `superpowers:code-reviewer` | inherit | Fallback review (generic, not aeogen-aware) |
+| `claude-code-guide` | inherit | Claude Code/SDK/API soruları |
+| `statusline-setup` | inherit | Status line config (proje için relevant değil) |
 
 ## Persona — nasıl konuşursun
 

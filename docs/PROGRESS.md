@@ -4,16 +4,17 @@
 > güncellenir. Manuel düzenleme yapılırsa orkestratör konfliği fark
 > eder ve kullanıcıya sorar.
 
-**Son güncelleme:** 2026-05-13 (git init + 3 branch + push + GitHub MCP
-kurulumu tamamlandı; Faz 0 ve Faz 1 A'nın bazı task'ları bitti)
+**Son güncelleme:** 2026-05-14 (agent fleet kuruldu — orchestrator +
+code-writer + code-reviewer hepsi Opus; A.T3 pnpm workspace skeleton
+yazıldı + review PASS)
 **Mevcut faz:** Faz 0 — langchain-master skill (⏳ Pending) + Faz 1 A
-(🔄 In progress: T3 sırada)
+(🔄 In progress: T4 sırada)
 **Mevcut alt-proje:** A — Foundation Bootstrap
-**Mevcut task:** A.T3 — pnpm workspace skeleton (sıradaki) **VEYA**
-Faz 0 T1 — langchain-master skill scaffold (bağımsız, paralel
+**Mevcut task:** A.T4 — `apps/web/` Next.js 15 scaffold (sıradaki)
+**VEYA** Faz 0 T1 — langchain-master skill scaffold (bağımsız, paralel
 yapılabilir)
 **Sıradaki milestone:** Faz 0 complete (~1 gün)
-**Toplam ilerleme:** 5 / ~70 task (%7)
+**Toplam ilerleme:** 6 / ~70 task (%9)
 
 ## Faz durumları
 
@@ -68,7 +69,7 @@ Yapılacaklar (high-level master plan §4.A'dan):
 - [x] T2.1: 3 environment branches (`dev`, `test`, `main`) + push (✅ 2026-05-13)
 - [x] T2.2: GitHub default branch = `dev` (✅ 2026-05-13)
 - [x] T2.3: GitHub MCP user-scope install (✅ 2026-05-13)
-- [ ] T3: pnpm workspace skeleton (`pnpm-workspace.yaml`, `package.json`)
+- [x] T3: pnpm workspace skeleton (`pnpm-workspace.yaml`, `package.json`) (✅ 2026-05-14 — feature/A.T3-pnpm-workspace-skeleton, review PASS)
 - [ ] T4: `apps/web/` Next.js 15 scaffold (App Router, TS strict, Tailwind, shadcn init)
 - [ ] T5: `apps/api/` FastAPI 3.12 scaffold (uv veya poetry, ruff, black, mypy strict)
 - [ ] T6: `packages/shared/` Pydantic + Zod parity schemas (JSON Schema bridge)
@@ -204,3 +205,23 @@ Master plan §4.C'den özet:
   - ✅ GitHub'da default branch `dev` olarak set edildi
 - **Sonraki adım:** Faz 0 — `langchain-master` skill implementation
   (sonra Faz 1 A.T3 pnpm workspace skeleton)
+
+### 2026-05-14
+- **Agent fleet kuruldu (Opus)** — `C:\aeogenerator\.claude\agents\`:
+  - `aeogen-orchestrator.md` (model: opus) — dispatcher agent
+  - `aeogen-code-writer.md` (model: opus) — default implementation agent
+  - `aeogen-code-reviewer.md` (model: opus, no Edit/Write tools) — verdict-only reviewer
+- Orkestratör SKILL.md dispatch matrix güncellendi: implementation
+  defaultu artık `aeogen-code-writer`, review defaultu `aeogen-code-reviewer`
+- **A.T3 ✅ pnpm workspace skeleton** (smoke test):
+  - Branch: `feature/A.T3-pnpm-workspace-skeleton`
+  - Files: `pnpm-workspace.yaml` (`apps/web` + `packages/shared`),
+    `package.json` (`pnpm@10.18.0`, Node ≥20.11, fan-out scripts)
+  - Review: `superpowers:code-reviewer` → PASS (P2 packageManager fix
+    applied — `10.0.0` → `10.18.0` for Corepack reproducibility)
+- **NOT:** Custom aeogen-* agent'lar bu sessionda Agent tool listesine
+  yüklenmedi (Claude Code agent'ları session başında okur). Bir sonraki
+  session'da otomatik aktif olacak. Smoke test için review leg
+  `superpowers:code-reviewer` ile çalıştırıldı.
+- **Pending:** Commit + push to feature branch + PR to `dev`
+  (kullanıcı onayı bekliyor — global CLAUDE.md "no auto-commit" kuralı)

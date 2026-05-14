@@ -2,5 +2,20 @@
   "version": 1,
   "owner": "aeogen-orchestrator",
   "created_at": "2026-05-13T00:00:00Z",
-  "entries": {}
+  "entries": {
+    "agent_fleet_v1": {
+      "file": "memory/agent_fleet_v1.md",
+      "cached_at": "2026-05-14T00:00:00Z",
+      "hit_count": 1,
+      "promoted": false,
+      "context": "Project-scope agent fleet kuruldu: aeogen-orchestrator + aeogen-code-writer + aeogen-code-reviewer, hepsi Opus, .claude/agents/ altında. Smoke test PASS (A.T3). Yeni session başlangıcına kadar Agent tool listesinde görünmez."
+    },
+    "smoke_test_AT3_2026_05_14": {
+      "file": "memory/smoke_test_AT3_2026_05_14.md",
+      "cached_at": "2026-05-14T00:00:00Z",
+      "hit_count": 1,
+      "promoted": false,
+      "context": "Smoke test: orchestrator skill → direct file write (writer agent not loaded yet this session) → superpowers:code-reviewer dispatch → PASS with P2 fix (pnpm@10.0.0 → 10.18.0). Validates the dispatch + verdict loop conceptually."
+    }
+  }
 }

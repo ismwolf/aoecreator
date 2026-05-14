@@ -68,7 +68,7 @@ desktop.ini
 # ── Claude Code ─────────────────────────────────────
 .claude/settings.local.json
 .claude/worktrees/
-.claude/agents/
+# .claude/agents/ tracked — project-scope agent fleet is shared infra
 
 # ── Test artifacts ──────────────────────────────────
 playwright-report/
