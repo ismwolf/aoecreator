@@ -4,8 +4,8 @@
 > güncellenir. Manuel düzenleme yapılırsa orkestratör konfliği fark
 > eder ve kullanıcıya sorar.
 
-**Son güncelleme:** 2026-05-14 (A.T4 implementation tamamlandı —
-build + typecheck + lint + headers PASS; commit/PR bekliyor)
+**Son güncelleme:** 2026-05-14 (A.T4 PR #4 merged — review
+CHANGES_REQUESTED → P1 env-default fix → PASS → shipped)
 **Mevcut faz:** Faz 1 A (🔄 In progress: T5 sırada) — Faz 0 ✅ DONE
 **Mevcut alt-proje:** A — Foundation Bootstrap
 **Mevcut task:** A.T5 — `apps/api/` FastAPI 3.12 scaffold
@@ -244,5 +244,8 @@ Master plan §4.C'den özet:
   - T4.5 route groups: `(marketing)/page.tsx` → `/`, `(auth)/login/page.tsx`, `(app)/dashboard/page.tsx` (collision-safe; no root `app/page.tsx`)
   - T4.6 `next.config.ts` with HSTS, X-Content-Type-Options, Referrer-Policy, X-Frame-Options, Permissions-Policy, permissive CSP placeholder; `typedRoutes` moved from `experimental` to top-level per Next 15.5 deprecation
   - T4.7 verification: `pnpm -r typecheck` ✅ · `pnpm -r lint` ✅ · `pnpm -r build` ✅ (4 routes: `/`, `/dashboard`, `/login`, `/_not-found`) · `pnpm -r test` placeholder ✅ · `curl -I http://localhost:3001/` confirms all 6 security headers present
-  - **Pending:** commit + push to `feature/A.T4-nextjs-scaffold` + PR → `dev` (orkestratör tarafından)
-- **Sıradaki:** A.T5 — `apps/api/` FastAPI 3.12 scaffold
+  - **Review (`superpowers:code-reviewer`):** CHANGES_REQUESTED
+    - P1: build broke without `.env.local` — fixed by `.default("http://localhost:3000")` on the Zod schema in `src/lib/env.ts`. Re-verified env-less `pnpm -r build` PASS.
+    - P2: shadcn `base-nova` preset accepted as new CLI default; documented in `apps/web/README.md`.
+  - **PR #4** → merged to `dev` — 22 files / ~9k lines (incl. `pnpm-lock.yaml`)
+- **Sıradaki:** A.T5 — `apps/api/` FastAPI 3.12 scaffold (plan henüz yazılmadı)
