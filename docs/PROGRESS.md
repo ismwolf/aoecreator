@@ -4,13 +4,13 @@
 > güncellenir. Manuel düzenleme yapılırsa orkestratör konfliği fark
 > eder ve kullanıcıya sorar.
 
-**Son güncelleme:** 2026-05-14 (A.T4 PR #4 merged — review
-CHANGES_REQUESTED → P1 env-default fix → PASS → shipped)
-**Mevcut faz:** Faz 1 A (🔄 In progress: T5 sırada) — Faz 0 ✅ DONE
+**Son güncelleme:** 2026-05-15 (A.T5 implementation + review PASS —
+ready for PR to dev)
+**Mevcut faz:** Faz 1 A (🔄 In progress: T6 sırada) — Faz 0 ✅ DONE
 **Mevcut alt-proje:** A — Foundation Bootstrap
-**Mevcut task:** A.T5 — `apps/api/` FastAPI 3.12 scaffold
+**Mevcut task:** A.T6 — `packages/shared/` Pydantic + Zod parity
 **Sıradaki milestone:** Faz 1 A complete (~1 hafta)
-**Toplam ilerleme:** 18 / ~70 task (%26) — Faz 0 +11 task, A.T3 +1, A.T4 +1
+**Toplam ilerleme:** 19 / ~70 task (%27) — Faz 0 +11 task, A.T3 +1, A.T4 +1, A.T5 +1
 
 ## Faz durumları
 
@@ -70,7 +70,7 @@ Yapılacaklar (high-level master plan §4.A'dan):
 - [x] T2.3: GitHub MCP user-scope install (✅ 2026-05-13)
 - [x] T3: pnpm workspace skeleton (`pnpm-workspace.yaml`, `package.json`) (✅ 2026-05-14 — feature/A.T3-pnpm-workspace-skeleton, review PASS)
 - [x] T4: `apps/web/` Next.js 15 scaffold (App Router, TS strict, Tailwind v4, shadcn init) — ✅ 2026-05-14 (feature/A.T4-nextjs-scaffold; build PASS, typecheck PASS, lint PASS, security headers verified via curl)
-- [ ] T5: `apps/api/` FastAPI 3.12 scaffold (uv veya poetry, ruff, black, mypy strict)
+- [x] T5: `apps/api/` FastAPI 3.12 scaffold (uv, ruff lint+format, mypy strict, pytest+asyncio, pydantic-settings) — ✅ 2026-05-15 (feature/A.T5-fastapi-scaffold; ruff/mypy/pytest/uv lock all green, health/live + health/ready live-verified, review PASS)
 - [ ] T6: `packages/shared/` Pydantic + Zod parity schemas (JSON Schema bridge)
 - [ ] T7: `infra/docker-compose.dev.yml` (Postgres + Redis + Adminer)
 - [ ] T8: `supabase/config.toml` + Supabase Cloud projesi link
@@ -249,3 +249,19 @@ Master plan §4.C'den özet:
     - P2: shadcn `base-nova` preset accepted as new CLI default; documented in `apps/web/README.md`.
   - **PR #4** → merged to `dev` — 22 files / ~9k lines (incl. `pnpm-lock.yaml`)
 - **Sıradaki:** A.T5 — `apps/api/` FastAPI 3.12 scaffold (plan henüz yazılmadı)
+
+### 2026-05-15
+- **A.T5 plan** — Plan subagent dispatch:
+  - User confirmed **uv** (Astral) as Python package manager (vs poetry/hatch+pip-tools)
+  - 7-task plan: `docs/plans/2026-05-15-A.T5-fastapi-scaffold-plan.md` (566 lines)
+  - 7 open questions resolved by orchestrator defaults: ruff format only (no black); pre-commit deferred to A.T10; module-level `app` + factory both; monorepo invocation Option B (README-only, no root script changes); license UNLICENSED; CORS deferred to A.T8; .env precedence Next.js parity
+  - Plan committed to `feature/A.T5-fastapi-scaffold` (`0e706cd`) + pushed
+- **A.T5 implementation ✅** (aeogen-code-writer subagent):
+  - T5.1 package shell + uv init, T5.2 ruff/mypy/pytest config block, T5.3 package skeleton (`__init__.py` + `py.typed`), T5.4 pydantic-settings parity for env.ts, T5.5 `create_app` factory + `/health/live` + `/health/ready`, T5.6 pytest-asyncio integration tests, T5.7 README polish + full gate
+  - Deps pinned: fastapi `<0.116`, pydantic `<3`, uvicorn `<0.33`, ruff `<0.7`, mypy `<2`, pytest `<9`, pytest-asyncio `<0.25`, httpx `<0.28`
+  - 13 files created under `apps/api/` (incl. `uv.lock`, 523 lines). No files outside `apps/api/` touched. `apps/api/` intentionally NOT in `pnpm-workspace.yaml`.
+  - Gates verified: `uv sync` clean · `uv run ruff check .` 0 errors · `uv run ruff format --check .` 6 files formatted · `uv run mypy src` Success 3 files · `uv run pytest -v` 2 passed · `uv lock --check` exit 0 · live curl `/health/live` + `/health/ready` JSON OK · root `pnpm -r typecheck/lint/build` still green for `@aeogen/web`
+- **Review (aeogen-code-reviewer subagent):** PASS — plan-conformance ✓, MUST/MUST NOT compliance ✓, no secrets, scope-fit clean (no Supabase/Celery/LangChain leakage), gates re-run match writer's claims
+  - P2 nit (non-blocking): only happy-path tests; negative/edge case coverage deferred to first real-endpoint task
+  - P3 nits: VIRTUAL_ENV host-shell warning (cosmetic); `dict[str, Any]` health return could tighten to `TypedDict` later
+- **Sıradaki:** A.T6 — `packages/shared/` Pydantic + Zod parity schemas (plan TBD)

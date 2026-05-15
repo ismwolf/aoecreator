@@ -1,0 +1,19 @@
+# Python tool caches (local defense-in-depth; repo root .gitignore also covers most)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+dist/
+build/
+*.egg-info/
+.coverage
+htmlcov/
+
+# Local env overrides (NEVER commit secrets)
+.env
+.env.local
+.env.*.local
