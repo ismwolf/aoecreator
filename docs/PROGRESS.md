@@ -4,13 +4,13 @@
 > güncellenir. Manuel düzenleme yapılırsa orkestratör konfliği fark
 > eder ve kullanıcıya sorar.
 
-**Son güncelleme:** 2026-05-15 (A.T5 implementation + review PASS —
-ready for PR to dev)
-**Mevcut faz:** Faz 1 A (🔄 In progress: T6 sırada) — Faz 0 ✅ DONE
+**Son güncelleme:** 2026-05-16 (A.T6 implementation + review PASS +
+P2 fix shipped)
+**Mevcut faz:** Faz 1 A (🔄 In progress: T7 sırada) — Faz 0 ✅ DONE
 **Mevcut alt-proje:** A — Foundation Bootstrap
-**Mevcut task:** A.T6 — `packages/shared/` Pydantic + Zod parity
+**Mevcut task:** A.T7 — `infra/docker-compose.dev.yml` (Postgres + Redis + Adminer)
 **Sıradaki milestone:** Faz 1 A complete (~1 hafta)
-**Toplam ilerleme:** 19 / ~70 task (%27) — Faz 0 +11 task, A.T3 +1, A.T4 +1, A.T5 +1
+**Toplam ilerleme:** 20 / ~70 task (%29) — Faz 0 +11 task, A.T3 +1, A.T4 +1, A.T5 +1, A.T6 +1
 
 ## Faz durumları
 
@@ -71,7 +71,7 @@ Yapılacaklar (high-level master plan §4.A'dan):
 - [x] T3: pnpm workspace skeleton (`pnpm-workspace.yaml`, `package.json`) (✅ 2026-05-14 — feature/A.T3-pnpm-workspace-skeleton, review PASS)
 - [x] T4: `apps/web/` Next.js 15 scaffold (App Router, TS strict, Tailwind v4, shadcn init) — ✅ 2026-05-14 (feature/A.T4-nextjs-scaffold; build PASS, typecheck PASS, lint PASS, security headers verified via curl)
 - [x] T5: `apps/api/` FastAPI 3.12 scaffold (uv, ruff lint+format, mypy strict, pytest+asyncio, pydantic-settings) — ✅ 2026-05-15 (feature/A.T5-fastapi-scaffold; ruff/mypy/pytest/uv lock all green, health/live + health/ready live-verified, review PASS)
-- [ ] T6: `packages/shared/` Pydantic + Zod parity schemas (JSON Schema bridge)
+- [x] T6: `packages/shared/` Zod ↔ Pydantic parity schemas (Zod 4 source + datamodel-code-generator + drift script) — ✅ 2026-05-16 (feature/A.T6-shared-zod-pydantic-parity; 2 example schemas Site+Workspace; same-fixture parity tests both sides; review PASS + P2 `--strip-default-none` flag removed)
 - [ ] T7: `infra/docker-compose.dev.yml` (Postgres + Redis + Adminer)
 - [ ] T8: `supabase/config.toml` + Supabase Cloud projesi link
 - [ ] T9: `@t3-oss/env-nextjs` + `pydantic-settings` env validation
@@ -265,3 +265,20 @@ Master plan §4.C'den özet:
   - P2 nit (non-blocking): only happy-path tests; negative/edge case coverage deferred to first real-endpoint task
   - P3 nits: VIRTUAL_ENV host-shell warning (cosmetic); `dict[str, Any]` health return could tighten to `TypedDict` later
 - **Sıradaki:** A.T6 — `packages/shared/` Pydantic + Zod parity schemas (plan TBD)
+
+### 2026-05-16
+- **A.T6 plan** — Plan subagent dispatch:
+  - User confirmed **Zod-first + Pydantic codegen** strategy (vs Pydantic-first / manual / TypeBox)
+  - 9-task plan: `docs/plans/2026-05-15-A.T6-shared-zod-pydantic-parity-plan.md` (650 lines)
+  - 8 open questions resolved: Zod 4 bump (single workspace major), `pydantic_v2.BaseModel`, defer apps/api install to Faz 2 B, `.strict()` default, `z.iso.datetime()`, default UUID chain, FAIL-on-drift, build-script-only (hooks to A.T10/T12)
+  - Plan committed to `feature/A.T6-shared-zod-pydantic-parity` (`66b8725`)
+- **A.T6 implementation ✅** (aeogen-code-writer subagent):
+  - T6.1 package shell, T6.2 apps/web zod 3→4 bump (no env.ts breakage), T6.3 TS toolchain, T6.4 Site + Workspace Zod schemas, T6.5 emit-json-schema.ts with `stripRedundantPatterns` + `collapseNullableAnyOf` rewriters, T6.6 pyproject.toml + codegen + check-drift scripts, T6.7 first codegen run (committed `python/aeogen_shared/{site,workspace}.py`), T6.8 parity tests (3 Vitest + 3 pytest against same fixtures), T6.9 README polish + full gate
+  - 26 files created under `packages/shared/`, 2 modified (`apps/web/package.json`, `pnpm-lock.yaml`)
+  - Justified deviations from plan: added `--use-annotated` (mypy strict needs it for `constr(...)`); custom `stripRequiredNullableDefault()` post-process (preserves Zod `.nullable()` required-semantics); JSON Schema rewriters bridge Zod 4 ↔ datamodel-code-generator output quirks
+  - Generated `Site` shape: `id: UUID, workspace_id: UUID, url: AnyUrl, default_language: Literal[...], sector: Annotated[str | None, Field(min=1, max=120)]`; `model_config = ConfigDict(extra="forbid")`. `Workspace` similar.
+  - Gates verified: pnpm build ✓ · vitest 3 passed · ruff ✓ · mypy 3 files Success · pytest 3 passed · check:drift OK · pnpm -r typecheck/lint/build/test ✓ · apps/api still 2 passed
+- **Review (aeogen-code-reviewer subagent):** PASS — plan-conformance ✓, deviations justified, cross-language parity invariant confirmed (omitted-required-nullable fails on BOTH sides; explicit-null accepted on BOTH; extra key rejected on BOTH), drift detection genuinely catches real drift (reviewer modified site.ts, ran check:drift → exit 1, reverted)
+  - P2: `--strip-default-none` codegen flag redundant today + future-risk when first `z.optional()` field lands. **Fix shipped:** flag removed from `codegen-pydantic.ts`, build re-run produces identical Python, all gates re-verified
+  - P3 follow-ups deferred to A.T10/T11: regex escape `fieldName` in stripRequiredNullableDefault, eliminate Node 22 `[DEP0190]` warning (spawn `pnpm.cmd` with shell:false on win32), extend `collapseNullableAnyOf` for 3-way unions when needed, lock omitted-required-nullable edge cases into committed parity tests
+- **Sıradaki:** A.T7 — `infra/docker-compose.dev.yml` (Postgres + Redis + Adminer)
