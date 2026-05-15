@@ -1,0 +1,45 @@
+[project]
+name = "aeogen-shared"
+version = "0.0.0"
+description = "Cross-language DTOs for aeogenerator — Pydantic v2 models generated from Zod source"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = { text = "UNLICENSED" }
+authors = [{ name = "aeogenerator team" }]
+dependencies = [
+  "pydantic>=2.9,<3",
+]
+
+[project.optional-dependencies]
+dev = [
+  "datamodel-code-generator>=0.26,<0.27",
+  "ruff>=0.6.9,<0.7",
+  "mypy>=1.11,<2",
+  "pytest>=8.3,<9",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["python/aeogen_shared"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["python", "tests/python"]
+extend-exclude = ["python/aeogen_shared/site.py", "python/aeogen_shared/workspace.py"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["python/aeogen_shared"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests/python"]
+pythonpath = ["python"]
+addopts = "-ra --strict-markers"
