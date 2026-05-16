@@ -4,13 +4,13 @@
 > güncellenir. Manuel düzenleme yapılırsa orkestratör konfliği fark
 > eder ve kullanıcıya sorar.
 
-**Son güncelleme:** 2026-05-16 (A.T6 implementation + review PASS +
-P2 fix shipped)
-**Mevcut faz:** Faz 1 A (🔄 In progress: T7 sırada) — Faz 0 ✅ DONE
+**Son güncelleme:** 2026-05-16 (A.T7 plan ⏸ BLOCKED on Docker Desktop
+missing → skip to A.T8 per user choice)
+**Mevcut faz:** Faz 1 A (🔄 In progress: T8 sırada, T7 ⏸ blocked) — Faz 0 ✅ DONE
 **Mevcut alt-proje:** A — Foundation Bootstrap
-**Mevcut task:** A.T7 — `infra/docker-compose.dev.yml` (Postgres + Redis + Adminer)
+**Mevcut task:** A.T8 — `supabase/config.toml` + Supabase Cloud link
 **Sıradaki milestone:** Faz 1 A complete (~1 hafta)
-**Toplam ilerleme:** 20 / ~70 task (%29) — Faz 0 +11 task, A.T3 +1, A.T4 +1, A.T5 +1, A.T6 +1
+**Toplam ilerleme:** 20 / ~70 task (%29) — Faz 0 +11 task, A.T3 +1, A.T4 +1, A.T5 +1, A.T6 +1; A.T7 plan ready but impl deferred
 
 ## Faz durumları
 
@@ -72,7 +72,7 @@ Yapılacaklar (high-level master plan §4.A'dan):
 - [x] T4: `apps/web/` Next.js 15 scaffold (App Router, TS strict, Tailwind v4, shadcn init) — ✅ 2026-05-14 (feature/A.T4-nextjs-scaffold; build PASS, typecheck PASS, lint PASS, security headers verified via curl)
 - [x] T5: `apps/api/` FastAPI 3.12 scaffold (uv, ruff lint+format, mypy strict, pytest+asyncio, pydantic-settings) — ✅ 2026-05-15 (feature/A.T5-fastapi-scaffold; ruff/mypy/pytest/uv lock all green, health/live + health/ready live-verified, review PASS)
 - [x] T6: `packages/shared/` Zod ↔ Pydantic parity schemas (Zod 4 source + datamodel-code-generator + drift script) — ✅ 2026-05-16 (feature/A.T6-shared-zod-pydantic-parity; 2 example schemas Site+Workspace; same-fixture parity tests both sides; review PASS + P2 `--strip-default-none` flag removed)
-- [ ] T7: `infra/docker-compose.dev.yml` (Postgres + Redis + Adminer)
+- [ ] T7: `infra/docker-compose.dev.yml` (Postgres + Redis) — ⏸ **BLOCKED 2026-05-16** on missing Docker Desktop. Plan ready (`docs/plans/2026-05-16-A.T7-docker-compose-dev-plan.md`, PR #7 plan-only merged). Resume: install Docker Desktop + WSL2 backend → new branch off dev → re-dispatch code-writer with same plan. **User chose to skip ahead to A.T8** (Supabase Cloud provides managed Postgres, making local Docker dev optional)
 - [ ] T8: `supabase/config.toml` + Supabase Cloud projesi link
 - [ ] T9: `@t3-oss/env-nextjs` + `pydantic-settings` env validation
 - [ ] T10: Husky + commitlint + lint-staged
@@ -282,3 +282,14 @@ Master plan §4.C'den özet:
   - P2: `--strip-default-none` codegen flag redundant today + future-risk when first `z.optional()` field lands. **Fix shipped:** flag removed from `codegen-pydantic.ts`, build re-run produces identical Python, all gates re-verified
   - P3 follow-ups deferred to A.T10/T11: regex escape `fieldName` in stripRequiredNullableDefault, eliminate Node 22 `[DEP0190]` warning (spawn `pnpm.cmd` with shell:false on win32), extend `collapseNullableAnyOf` for 3-way unions when needed, lock omitted-required-nullable edge cases into committed parity tests
 - **Sıradaki:** A.T7 — `infra/docker-compose.dev.yml` (Postgres + Redis + Adminer)
+- **A.T7 plan-only PR** — Plan dispatch + decisions:
+  - User locked: `supabase/postgres:15.8.1.060` + bind mounts under `./.docker-data/` + no admin UI + hybrid dev (apps stay on host)
+  - 6-task plan written: `docs/plans/2026-05-16-A.T7-docker-compose-dev-plan.md` (501 lines, 12 open questions resolved)
+  - Plan committed to `feature/A.T7-docker-compose-dev` (`c70e845`) + push
+- **A.T7 implementation ⏸ BLOCKED** (aeogen-code-writer subagent pre-flight):
+  - Docker Desktop yüklü değil (`docker info` → command not found)
+  - WSL2 distro yok (`wsl --list --verbose` → "no installed distributions")
+  - Code-writer correctly STOPPED per pre-flight rule (no speculative file writes, no verification bypass)
+  - **User choice:** skip ahead to A.T8 (Supabase Cloud managed Postgres makes local Docker dev optional for now)
+  - Plan stays valid + merged for future resume when Docker installed
+- **Sıradaki:** A.T8 — `supabase/config.toml` + Supabase Cloud link + types codegen
