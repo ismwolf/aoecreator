@@ -78,6 +78,16 @@ coverage/
 
 # ── Project-specific ────────────────────────────────
 supabase/.temp/
+supabase/.branches/
+supabase/.env
+supabase/.env.local
+.supabase/
 crawls/                 # local crawl HTML snapshots
 .modal-cache/
 *.local
+
+# ── MCP per-dev override (live .mcp.json IS committed for dev) ──
+# .mcp.json is committed — dev project ref is safe because the ref
+# points only at the dev Cloud project. If a per-dev override is
+# needed, create .mcp.local.json (gitignored).
+.mcp.local.json

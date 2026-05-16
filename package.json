@@ -13,5 +13,8 @@
     "test": "pnpm -r --parallel test",
     "build": "pnpm -r --parallel build",
     "dev": "pnpm -r --parallel dev"
+  },
+  "devDependencies": {
+    "supabase": "^2.98.2"
   }
 }
