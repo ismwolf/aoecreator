@@ -1,11 +1,30 @@
-"""Shared pytest fixtures for apps/api tests."""
+"""Shared pytest fixtures for apps/api tests.
 
+Env injection runs at module import time (before any fixtures resolve) so that
+the cached Settings instance is built from the test env, not from a stray
+developer `.env.local`.
+"""
+
+import os
 from collections.abc import AsyncIterator
 
 import pytest
 from httpx import ASGITransport, AsyncClient
 
+# ----------------------------------------------------------------------
+# Supabase env injection (A.T8)
+# Settings declares 3 required Supabase fields. Inject test values BEFORE
+# `aeogen.main` / `aeogen.settings` are imported below.
+# ----------------------------------------------------------------------
+os.environ.setdefault("SUPABASE_URL", "https://test.supabase.co")
+os.environ.setdefault("SUPABASE_PUBLISHABLE_KEY", "sb_publishable_test_" + "x" * 20)
+os.environ.setdefault("SUPABASE_SECRET_KEY", "sb_secret_test_" + "x" * 20)
+
 from aeogen.main import create_app
+from aeogen.settings import get_settings
+
+# Drop any cached settings imported transitively before env was set.
+get_settings.cache_clear()
 
 
 @pytest.fixture

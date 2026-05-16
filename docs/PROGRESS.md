@@ -4,13 +4,13 @@
 > güncellenir. Manuel düzenleme yapılırsa orkestratör konfliği fark
 > eder ve kullanıcıya sorar.
 
-**Son güncelleme:** 2026-05-16 (A.T7 plan ⏸ BLOCKED on Docker Desktop
-missing → skip to A.T8 per user choice)
-**Mevcut faz:** Faz 1 A (🔄 In progress: T8 sırada, T7 ⏸ blocked) — Faz 0 ✅ DONE
+**Son güncelleme:** 2026-05-16 (A.T8 implementation PASS — Supabase
+CLI + .mcp.json + env schema + types stub; T8.3 login deferred to user)
+**Mevcut faz:** Faz 1 A (🔄 In progress: T9 sırada, T7 ⏸ blocked) — Faz 0 ✅ DONE
 **Mevcut alt-proje:** A — Foundation Bootstrap
-**Mevcut task:** A.T8 — `supabase/config.toml` + Supabase Cloud link
+**Mevcut task:** A.T9 — `@t3-oss/env-nextjs` + `pydantic-settings` env validation expansion (DATABASE_URL, REDIS_URL, OPENROUTER_API_KEY)
 **Sıradaki milestone:** Faz 1 A complete (~1 hafta)
-**Toplam ilerleme:** 20 / ~70 task (%29) — Faz 0 +11 task, A.T3 +1, A.T4 +1, A.T5 +1, A.T6 +1; A.T7 plan ready but impl deferred
+**Toplam ilerleme:** 21 / ~70 task (%30) — Faz 0 +11 task, A.T3 +1, A.T4 +1, A.T5 +1, A.T6 +1, A.T8 +1; A.T7 plan ready but impl deferred
 
 ## Faz durumları
 
@@ -73,7 +73,7 @@ Yapılacaklar (high-level master plan §4.A'dan):
 - [x] T5: `apps/api/` FastAPI 3.12 scaffold (uv, ruff lint+format, mypy strict, pytest+asyncio, pydantic-settings) — ✅ 2026-05-15 (feature/A.T5-fastapi-scaffold; ruff/mypy/pytest/uv lock all green, health/live + health/ready live-verified, review PASS)
 - [x] T6: `packages/shared/` Zod ↔ Pydantic parity schemas (Zod 4 source + datamodel-code-generator + drift script) — ✅ 2026-05-16 (feature/A.T6-shared-zod-pydantic-parity; 2 example schemas Site+Workspace; same-fixture parity tests both sides; review PASS + P2 `--strip-default-none` flag removed)
 - [ ] T7: `infra/docker-compose.dev.yml` (Postgres + Redis) — ⏸ **BLOCKED 2026-05-16** on missing Docker Desktop. Plan ready (`docs/plans/2026-05-16-A.T7-docker-compose-dev-plan.md`, PR #7 plan-only merged). Resume: install Docker Desktop + WSL2 backend → new branch off dev → re-dispatch code-writer with same plan. **User chose to skip ahead to A.T8** (Supabase Cloud provides managed Postgres, making local Docker dev optional)
-- [ ] T8: `supabase/config.toml` + Supabase Cloud projesi link
+- [x] T8: `supabase/config.toml` + Supabase Cloud link + `.mcp.json` (MCP-first) + env schema expansion + `database.types.ts` stub — ✅ 2026-05-16 (feature/A.T8-supabase-impl; CLI bootstrap done, MCP URL=`https://mcp.supabase.com/mcp?project_ref=ngjlxlkdfgfhiookndpl`, T8.3 login + real types codegen deferred to user-interactive post-merge; review PASS)
 - [ ] T9: `@t3-oss/env-nextjs` + `pydantic-settings` env validation
 - [ ] T10: Husky + commitlint + lint-staged
 - [ ] T11: `gitleaks` pre-commit
@@ -293,3 +293,28 @@ Master plan §4.C'den özet:
   - **User choice:** skip ahead to A.T8 (Supabase Cloud managed Postgres makes local Docker dev optional for now)
   - Plan stays valid + merged for future resume when Docker installed
 - **Sıradaki:** A.T8 — `supabase/config.toml` + Supabase Cloud link + types codegen
+- **A.T8 plan** — Plan subagent dispatch + user-locked decisions:
+  - User confirmed: project ref `ngjlxlkdfgfhiookndpl`, MCP-first workflow ("tablo açacaksın"), MCP URL literal `https://mcp.supabase.com/mcp?project_ref=ngjlxlkdfgfhiookndpl` (no `read_only`/`features` params), `supabase login` not yet run
+  - 8-task plan: `docs/plans/2026-05-16-A.T8-supabase-link-plan.md` (~640 lines)
+  - Plan PR #8 (autonomous merge during "Continue from where you left off"): plan + `.mcp.json` + `.mcp.json.example`
+- **A.T8 implementation ✅** (aeogen-code-writer + manual URL pin):
+  - T8.1 supabase@^2.98.2 CLI as workspace devDep
+  - T8.2 `supabase init` scaffold: `supabase/config.toml` (`project_id = "aeogen"`), `.gitignore`, `migrations/.gitkeep`, `README.md` (MCP-first workflow)
+  - T8.3 `supabase login` + `link` **DEFERRED** to user-interactive post-merge (browser OAuth)
+  - T8.4 `apps/web/src/lib/database.types.ts` hand-authored STUB (~110 lines, mirrors CLI empty-schema output, drop-in replaceable)
+  - T8.5 Runtime deps: web `@supabase/ssr@0.10.3` + `@supabase/supabase-js@2.105.4`; api `supabase==2.30.0` (`>=2.6,<3` pinned)
+  - T8.6 Env schemas: web `env.ts` t3-env client/server split with regex `sb_publishable_*` / `sb_secret_*`; api `Settings` with `HttpUrl` + `SecretStr` + `field_validator`; `.env.example` files extended; `conftest.py` env injection at MODULE TOP (lru_cache ordering)
+  - T8.7 `.mcp.json` URL: user's literal `?project_ref=ngjlxlkdfgfhiookndpl` only (no params) — pinned manually after autonomous run
+  - T8.8 `.gitignore` extensions (supabase scratch + `.mcp.local.json`); `package.json` `pnpm.onlyBuiltDependencies` removed (duplicate of `pnpm-workspace.yaml`)
+  - Justified deviations: `onlyBuiltDependencies` in pnpm-workspace.yaml (pnpm 10 canonical); manual one-time `node scripts/postinstall.js` for supabase.exe fetch; `mypy # type: ignore[call-arg]` on `Settings()` (pydantic-settings + mypy strict false-positive); conftest env at module top (not fixture) for lru_cache safety
+  - Gates verified: typecheck/lint/build green for `@aeogen/web` (with placeholder env vars); apps/api 2 tests passed; packages/shared 3+3 tests passed; check:drift OK; no secret leak; supabase 2.98.2 CLI version confirmed
+- **Review (aeogen-code-reviewer subagent):** PASS — plan-conformance ✓ (T8.3 + real types codegen marked "deferred per plan"), MUST/MUST NOT ✓, stub quality "high-fidelity, drop-in replaceable", no scope creep
+  - P3 #1: `onlyBuiltDependencies` duplicate (fixed before commit — removed from `package.json`)
+  - P3 #2: no negative-path tests for new env validators (deferred to A.T9/A.T10)
+  - P3 #3: `import 'server-only'` discipline acknowledged for Faz 2 G consumers
+- **Post-merge user actions REQUIRED:**
+  1. `pnpm exec supabase login` (browser OAuth)
+  2. `pnpm exec supabase link --project-ref ngjlxlkdfgfhiookndpl`
+  3. Restart Claude Code so `.mcp.json` loads `mcp__supabase__*` tools
+  4. Regenerate `apps/web/src/lib/database.types.ts` via MCP or CLI `--linked`
+- **Sıradaki:** A.T9 — env validation expansion (DATABASE_URL, REDIS_URL, OPENROUTER_API_KEY, gen-types CI)

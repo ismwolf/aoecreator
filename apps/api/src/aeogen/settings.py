@@ -1,14 +1,13 @@
 """Settings parity for apps/web's @t3-oss/env-nextjs.
 
-Validates env vars at startup. Like A.T4's src/lib/env.ts, this only
-declares fields that exist today — Supabase / OpenRouter / DB fields
-are added in A.T8/T9 alongside their first real consumers.
+Validates env vars at startup. Supabase fields land in A.T8; OpenRouter /
+Redis / DATABASE_URL follow in A.T9 alongside their first real consumers.
 """
 
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import Field
+from pydantic import Field, HttpUrl, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -34,8 +33,32 @@ class Settings(BaseSettings):
     host: str = Field(default="127.0.0.1")
     port: int = Field(default=8000, ge=1, le=65535)
 
+    # Supabase (A.T8). New-format keys only; legacy JWT keys rejected.
+    supabase_url: HttpUrl = Field(
+        description="e.g. https://ngjlxlkdfgfhiookndpl.supabase.co",
+    )
+    supabase_publishable_key: str = Field(
+        pattern=r"^sb_publishable_",
+        min_length=20,
+        description="New-format publishable key (sb_publishable_...).",
+    )
+    supabase_secret_key: SecretStr = Field(
+        description="New-format secret key (sb_secret_...). SecretStr blocks repr leak.",
+    )
+
+    @field_validator("supabase_secret_key")
+    @classmethod
+    def _validate_secret_prefix(cls, v: SecretStr) -> SecretStr:
+        if not v.get_secret_value().startswith("sb_secret_"):
+            raise ValueError("must be a new-format Supabase secret key (sb_secret_...)")
+        return v
+
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
-    """Cached settings accessor for DI use."""
-    return Settings()
+    """Cached settings accessor for DI use.
+
+    pydantic-settings populates required fields from environment variables at
+    runtime, but mypy can't see that — silence the false-positive call-arg.
+    """
+    return Settings()  # type: ignore[call-arg]
