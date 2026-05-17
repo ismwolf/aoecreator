@@ -4,13 +4,13 @@
 > güncellenir. Manuel düzenleme yapılırsa orkestratör konfliği fark
 > eder ve kullanıcıya sorar.
 
-**Son güncelleme:** 2026-05-16 (A.T8 implementation PASS — Supabase
-CLI + .mcp.json + env schema + types stub; T8.3 login deferred to user)
-**Mevcut faz:** Faz 1 A (🔄 In progress: T9 sırada, T7 ⏸ blocked) — Faz 0 ✅ DONE
-**Mevcut alt-proje:** A — Foundation Bootstrap
-**Mevcut task:** A.T9 — `@t3-oss/env-nextjs` + `pydantic-settings` env validation expansion (DATABASE_URL, REDIS_URL, OPENROUTER_API_KEY)
-**Sıradaki milestone:** Faz 1 A complete (~1 hafta)
-**Toplam ilerleme:** 21 / ~70 task (%30) — Faz 0 +11 task, A.T3 +1, A.T4 +1, A.T5 +1, A.T6 +1, A.T8 +1; A.T7 plan ready but impl deferred
+**Son güncelleme:** 2026-05-17 (Faz 2 B.1 tenancy + RLS foundation PASS
+via MCP; advisors clean; types regenerated)
+**Mevcut faz:** Faz 2 B (🔄 In progress: B.1 done, B.2 next) — Faz 0 ✅, Faz 1 A foundation kısmen done (A.T7 ⏸, A.T9-T14 sıralı eklenecek)
+**Mevcut alt-proje:** B — Data layer + multi-tenancy (3 sub-cycle decomposition)
+**Mevcut task:** B.2 — sites + pages + analysis_runs + agent_executions + scores (5 domain tables)
+**Sıradaki milestone:** Faz 2 B complete (B.1 ✅ + B.2 + B.3, ~2-3 saat kaldı)
+**Toplam ilerleme:** 22 / ~70 task (%31) — Faz 0 +11, A.T3-T6 +4, A.T8 +1, B.1 +1; A.T7 + A.T9-T14 deferred
 
 ## Faz durumları
 
@@ -88,16 +88,45 @@ Yapılacaklar (high-level master plan §4.A'dan):
 
 ---
 
-## Faz 2 (B) — Data Layer + Multi-Tenancy (⏸ Blocked)
+## Faz 2 (B) — Data Layer + Multi-Tenancy (🔄 In progress: B.1 done)
 
-**Spec/Plan:** Henüz yazılmadı.
-Master plan §4.B'den özet:
-- [ ] Supabase migrations (11 tablo)
-- [ ] RLS policies (her tablo, `TO authenticated` + `with check`)
-- [ ] Indexes (RLS sütunları + FK'lar)
+**Decomposition (user-locked 2026-05-17):** 3 sub-cycle PR
+- **B.1** ✅ tenancy + RLS foundation (4 tablo: organizations, org_members, workspaces, workspace_members)
+- **B.2** ⏳ domain entities (5 tablo: sites, pages, analysis_runs, agent_executions, scores)
+- **B.3** ⏳ agent SDK support (4 tablo: agent_memory, agent_skills, embeddings, audit_log) + pgvector enable
+
+### B.1 — Tenancy + RLS foundation (✅ 2026-05-17)
+**Spec:** `docs/specs/2026-05-17-faz2b-b1-tenancy-spec.md`
+**Plan:** `docs/plans/2026-05-17-faz2b-b1-tenancy-plan.md`
+- [x] 4 tablo migration via MCP `apply_migration`: organizations, org_members, workspaces, workspace_members
+- [x] Soft-delete pattern (`deleted_at timestamptz` her tabloda)
+- [x] SECURITY DEFINER RLS helpers in `private` schema (NOT exposed via PostgREST): `user_workspace_ids()`, `current_org_id()`, `is_org_admin(uuid)`
+- [x] 16 RLS policies (4 tablo × {SELECT, INSERT, UPDATE, DELETE} — INSERT/DELETE denied except via Edge Function)
+- [x] 5 partial indexes (`where deleted_at is null`) + 2 unique partial indexes (org/user, ws/user)
+- [x] moddatetime triggers (4 — auto-bump `updated_at`)
+- [x] `get_advisors('security')` lints: empty (3 WARN düzeltildi: search_path mutable + 2x SECURITY DEFINER executable via REST)
+- [x] `database.types.ts` regenerated via MCP — 4 tablo `Database['public']['Tables']` altında
+- [x] 2 migration registered: `20260517030213_b1_tenancy`, `20260517030515_b1_security_hardening`
+
+### B.2 — Domain entities (⏳ Pending)
+- [ ] sites (workspace_id FK, url, default_language, sector)
+- [ ] pages (site_id FK, url, last_crawled_at, html_path, parsed_content)
+- [ ] analysis_runs (workspace, site, status, kicked_by, started_at)
+- [ ] agent_executions (run_id, agent_name, technique_id, status, input, output, score, llm_cost, duration_ms)
+- [ ] scores (page_id, technique_id, score, prev_score, recommendation)
+- [ ] RLS policies + indexes (FK + workspace_id)
+
+### B.3 — Agent SDK support (⏳ Pending)
+- [ ] agent_memory (agent_name, scope, key, value, cached_at)
+- [ ] agent_skills (agent_name, skill_key, content, source)
+- [ ] embeddings (page_id, chunk_id, content, vector(1024), embedding_sparse jsonb) — pgvector enable
+- [ ] audit_log (org_id, actor, action, resource, ts)
+- [ ] RLS + indexes (including pgvector hybrid hnsw + sparse)
+
+### Faz 2 G (separate alt-proje, after B.3)
 - [ ] `provision-org-on-signup` Edge Function
-- [ ] `npx supabase gen types typescript --linked > apps/web/src/lib/database.types.ts`
-- [ ] BOLA isolation test (User A workspace ↛ User B token)
+- [ ] Invite flow (`invitations` table)
+- [ ] Pytest BOLA integration test (User A workspace ↛ User B token, real auth.users)
 
 ---
 
@@ -318,3 +347,16 @@ Master plan §4.C'den özet:
   3. Restart Claude Code so `.mcp.json` loads `mcp__supabase__*` tools
   4. Regenerate `apps/web/src/lib/database.types.ts` via MCP or CLI `--linked`
 - **Sıradaki:** A.T9 — env validation expansion (DATABASE_URL, REDIS_URL, OPENROUTER_API_KEY, gen-types CI)
+
+### 2026-05-17
+- **Supabase MCP authenticated** (OAuth flow via browser → callback). Tools loaded: 20 mcp__supabase__* including apply_migration, list_tables, generate_typescript_types, get_advisors.
+- **A.T8 follow-up PR #10 merged:** `database.types.ts` stub replaced with MCP-generated canonical (includes `__InternalSupabase`, `Constants`, etc.)
+- **Faz 2 B decomposition decision** (user-locked): 3 sub-cycle PR — B.1 tenancy, B.2 domain, B.3 agent SDK.
+- **B.1 brainstorm decisions** (user-locked): soft-delete (deleted_at column every table), MCP-first migration workflow (apply_migration + local file mirror per global rule), helpers in `private` schema for PostgREST hiding.
+- **B.1 spec + plan written:** `docs/specs/2026-05-17-faz2b-b1-tenancy-spec.md`, `docs/plans/2026-05-17-faz2b-b1-tenancy-plan.md`.
+- **B.1 migrations applied via MCP** (2 migrations):
+  - `20260517030213_b1_tenancy` — 4 tables + helpers (initially in public schema) + 16 RLS policies + 5 partial indexes + 4 triggers + moddatetime extension
+  - `20260517030515_b1_security_hardening` — moved helpers to `private` schema, recreated all policies with `private.*` references. Fixed 3 advisor WARN findings (search_path mutable, 2x SECURITY DEFINER REST-exposed).
+- **MCP rollback observed:** First hardening attempt failed mid-migration (policy "organizations_insert_denied" already exists — survived CASCADE because used `with check (false)` not the dropped function). Postgres atomicity rolled back entire migration. Second attempt explicitly dropped all 16 policies first.
+- **Verification:** `get_advisors('security')` → `{"lints": []}`. `list_tables` → 4 tables rls_enabled. `pnpm --filter @aeogen/web typecheck` + `lint` pass.
+- **Sıradaki:** B.2 — domain entities (5 tables: sites, pages, analysis_runs, agent_executions, scores)
