@@ -3,7 +3,6 @@
 // Do NOT hand-edit — regenerate via MCP after every migration:
 //   mcp__supabase__generate_typescript_types
 //   (or CLI fallback: pnpm exec supabase gen types typescript --linked)
-// Last regen: 2026-05-17 (Faz 2 B.1 — 4 tenancy tables).
 
 export type Json =
   | string
@@ -21,6 +20,132 @@ export type Database = {
   }
   public: {
     Tables: {
+      agent_executions: {
+        Row: {
+          agent_name: string
+          created_at: string
+          deleted_at: string | null
+          duration_ms: number | null
+          id: string
+          input: Json | null
+          llm_cost: number
+          output: Json | null
+          run_id: string
+          score: number | null
+          status: string
+          technique_id: number
+          trace_id: string | null
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          agent_name: string
+          created_at?: string
+          deleted_at?: string | null
+          duration_ms?: number | null
+          id?: string
+          input?: Json | null
+          llm_cost?: number
+          output?: Json | null
+          run_id: string
+          score?: number | null
+          status?: string
+          technique_id: number
+          trace_id?: string | null
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          agent_name?: string
+          created_at?: string
+          deleted_at?: string | null
+          duration_ms?: number | null
+          id?: string
+          input?: Json | null
+          llm_cost?: number
+          output?: Json | null
+          run_id?: string
+          score?: number | null
+          status?: string
+          technique_id?: number
+          trace_id?: string | null
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_executions_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "analysis_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "agent_executions_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      analysis_runs: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          finished_at: string | null
+          id: string
+          kicked_by: string | null
+          site_id: string
+          started_at: string | null
+          status: string
+          total_cost_usd: number
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          finished_at?: string | null
+          id?: string
+          kicked_by?: string | null
+          site_id: string
+          started_at?: string | null
+          status?: string
+          total_cost_usd?: number
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          finished_at?: string | null
+          id?: string
+          kicked_by?: string | null
+          site_id?: string
+          started_at?: string | null
+          status?: string
+          total_cost_usd?: number
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "analysis_runs_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "analysis_runs_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       org_members: {
         Row: {
           created_at: string
@@ -82,6 +207,171 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      pages: {
+        Row: {
+          content_hash: string | null
+          created_at: string
+          deleted_at: string | null
+          html_path: string | null
+          id: string
+          last_crawled_at: string | null
+          parsed_content: Json | null
+          site_id: string
+          updated_at: string
+          url: string
+          workspace_id: string
+        }
+        Insert: {
+          content_hash?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          html_path?: string | null
+          id?: string
+          last_crawled_at?: string | null
+          parsed_content?: Json | null
+          site_id: string
+          updated_at?: string
+          url: string
+          workspace_id: string
+        }
+        Update: {
+          content_hash?: string | null
+          created_at?: string
+          deleted_at?: string | null
+          html_path?: string | null
+          id?: string
+          last_crawled_at?: string | null
+          parsed_content?: Json | null
+          site_id?: string
+          updated_at?: string
+          url?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pages_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pages_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scores: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          id: string
+          page_id: string
+          prev_score: number | null
+          recommendations: Json | null
+          run_id: string
+          score: number
+          technique_id: number
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          page_id: string
+          prev_score?: number | null
+          recommendations?: Json | null
+          run_id: string
+          score: number
+          technique_id: number
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          page_id?: string
+          prev_score?: number | null
+          recommendations?: Json | null
+          run_id?: string
+          score?: number
+          technique_id?: number
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scores_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scores_run_id_fkey"
+            columns: ["run_id"]
+            isOneToOne: false
+            referencedRelation: "analysis_runs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scores_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sites: {
+        Row: {
+          created_at: string
+          default_language: string
+          deleted_at: string | null
+          id: string
+          last_crawled_at: string | null
+          sector: string | null
+          updated_at: string
+          url: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          default_language?: string
+          deleted_at?: string | null
+          id?: string
+          last_crawled_at?: string | null
+          sector?: string | null
+          updated_at?: string
+          url: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          default_language?: string
+          deleted_at?: string | null
+          id?: string
+          last_crawled_at?: string | null
+          sector?: string | null
+          updated_at?: string
+          url?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sites_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       workspace_members: {
         Row: {
