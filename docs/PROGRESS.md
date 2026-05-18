@@ -4,13 +4,14 @@
 > güncellenir. Manuel düzenleme yapılırsa orkestratör konfliği fark
 > eder ve kullanıcıya sorar.
 
-**Son güncelleme:** 2026-05-17 (Faz 2 B.1 tenancy + RLS foundation PASS
-via MCP; advisors clean; types regenerated)
-**Mevcut faz:** Faz 2 B (🔄 In progress: B.1 done, B.2 next) — Faz 0 ✅, Faz 1 A foundation kısmen done (A.T7 ⏸, A.T9-T14 sıralı eklenecek)
+**Son güncelleme:** 2026-05-19 (Faz 2 B.2 domain entities PASS via MCP;
+5 tables + 15 RLS policies + 15 partial indexes; advisors clean;
+types regenerated to 9 tables)
+**Mevcut faz:** Faz 2 B (🔄 In progress: B.1 ✅, B.2 ✅, B.3 next) — Faz 0 ✅, Faz 1 A foundation kısmen done (A.T7 ⏸, A.T9-T14 sıralı eklenecek)
 **Mevcut alt-proje:** B — Data layer + multi-tenancy (3 sub-cycle decomposition)
-**Mevcut task:** B.2 — sites + pages + analysis_runs + agent_executions + scores (5 domain tables)
-**Sıradaki milestone:** Faz 2 B complete (B.1 ✅ + B.2 + B.3, ~2-3 saat kaldı)
-**Toplam ilerleme:** 22 / ~70 task (%31) — Faz 0 +11, A.T3-T6 +4, A.T8 +1, B.1 +1; A.T7 + A.T9-T14 deferred
+**Mevcut task:** B.3 — agent_memory + agent_skills + embeddings (pgvector enable) + audit_log (4 tables)
+**Sıradaki milestone:** Faz 2 B complete (B.1 ✅ + B.2 ✅ + B.3, ~1-2 saat kaldı)
+**Toplam ilerleme:** 23 / ~70 task (%33) — Faz 0 +11, A.T3-T6 +4, A.T8 +1, B.1 +1, B.2 +1; A.T7 + A.T9-T14 deferred
 
 ## Faz durumları
 
@@ -108,13 +109,20 @@ Yapılacaklar (high-level master plan §4.A'dan):
 - [x] `database.types.ts` regenerated via MCP — 4 tablo `Database['public']['Tables']` altında
 - [x] 2 migration registered: `20260517030213_b1_tenancy`, `20260517030515_b1_security_hardening`
 
-### B.2 — Domain entities (⏳ Pending)
-- [ ] sites (workspace_id FK, url, default_language, sector)
-- [ ] pages (site_id FK, url, last_crawled_at, html_path, parsed_content)
-- [ ] analysis_runs (workspace, site, status, kicked_by, started_at)
-- [ ] agent_executions (run_id, agent_name, technique_id, status, input, output, score, llm_cost, duration_ms)
-- [ ] scores (page_id, technique_id, score, prev_score, recommendation)
-- [ ] RLS policies + indexes (FK + workspace_id)
+### B.2 — Domain entities (✅ 2026-05-19)
+**Spec:** `docs/specs/2026-05-19-faz2b-b2-domain-spec.md`
+**Plan:** `docs/plans/2026-05-19-faz2b-b2-domain-plan.md`
+**PR:** [#12](https://github.com/ismwolf/aoecreator/pull/12) (merged → `48c0dec`)
+- [x] 5 tablo migration via MCP `apply_migration`: sites, pages, analysis_runs, agent_executions, scores
+- [x] `workspace_id` denormalize on every B.2 table (RLS perf — join-free predicate)
+- [x] Schema decisions locked: `technique_id smallint CHECK 1..12`, `status text + CHECK`, `kicked_by ON DELETE SET NULL`, `input/output jsonb`
+- [x] 15 RLS policies (5 tablo × {SELECT, INSERT, UPDATE} — DELETE app-level soft via deleted_at)
+- [x] 3 unique partial indexes (`sites_workspace_url`, `pages_site_url`, `scores_page_technique_run`) + 12 perf partial indexes
+- [x] 5 moddatetime triggers (`updated_at` auto-bump)
+- [x] CHECK constraints: URL regex `^https?://`, score 0-100, content_hash sha256 hex, language 2-char
+- [x] `get_advisors('security')` lints: empty (paranoia re-check post-merge passed)
+- [x] `database.types.ts` regenerated via MCP — 9 tables (B.1 + B.2) typed
+- [x] Local migration mirror: `supabase/migrations/20260519000000_b2_domain.sql` (266 lines)
 
 ### B.3 — Agent SDK support (⏳ Pending)
 - [ ] agent_memory (agent_name, scope, key, value, cached_at)
@@ -360,3 +368,19 @@ Master plan §4.C'den özet:
 - **MCP rollback observed:** First hardening attempt failed mid-migration (policy "organizations_insert_denied" already exists — survived CASCADE because used `with check (false)` not the dropped function). Postgres atomicity rolled back entire migration. Second attempt explicitly dropped all 16 policies first.
 - **Verification:** `get_advisors('security')` → `{"lints": []}`. `list_tables` → 4 tables rls_enabled. `pnpm --filter @aeogen/web typecheck` + `lint` pass.
 - **Sıradaki:** B.2 — domain entities (5 tables: sites, pages, analysis_runs, agent_executions, scores)
+
+### 2026-05-19
+- **B.2 brainstorm (4 user-locked kararlar):** technique_id smallint+CHECK(1..12) (no techniques table v1), status text+CHECK (B.1 role pattern, ALTER-friendly), kicked_by ON DELETE SET NULL (historical run preserved), agent_executions input/output as jsonb (master plan §4.B uyumlu).
+- **B.2 spec + plan written:** `docs/specs/2026-05-19-faz2b-b2-domain-spec.md`, `docs/plans/2026-05-19-faz2b-b2-domain-plan.md`.
+- **B.2 dispatch (aeogen-code-writer):**
+  - T1: 266-line SQL written to `supabase/migrations/20260519000000_b2_domain.sql`
+  - T2: MCP `apply_migration(name="b2_domain", ...)` → success (atomic, no rollback)
+  - T3: `list_tables(public)` → 9 tables, B.2'nin 5'i `rls_enabled=true`; `get_advisors('security')` → `{"lints":[]}`
+  - T4: `database.types.ts` regenerated via MCP → 9 tables
+  - T5: typecheck/lint/build all exit 0
+  - T6: commit `d5f3d79` + push `feature/B.2-domain-entities`
+  - **Workspace_id denormalize:** pages, agent_executions, scores tablolarına da workspace_id FK eklendi (RLS perf canonical Supabase pattern — join-free predicate)
+- **B.2 review (aeogen-code-reviewer):** PASS — plan-conformance ✓, spec-conformance line-by-line ✓, RLS audit clean (`private.user_workspace_ids()` doğru kullanılmış, `WITH CHECK` her INSERT/UPDATE'te, soft-delete pattern korunmuş, kicked_by SET NULL). P3 nits: reviewer MCP'siz çalıştığı için orchestrator paranoya re-check istedi.
+- **Orchestrator paranoya re-check (MCP):** `get_advisors('security')` → `{"lints":[]}`, `pg_policies` count → 15 (5 tablo × 3), `list_tables` → 9 tables hep `rls_enabled=true`. Writer ayrıca her tabloya helpful `comment` eklemiş (`Client websites under a workspace`, `Crawled pages...`, vb.).
+- **PR #12** → merged to dev (`48c0dec`). Feature branch deleted.
+- **Sıradaki:** B.3 — agent SDK support (4 tablo: agent_memory, agent_skills, embeddings + pgvector enable, audit_log)
