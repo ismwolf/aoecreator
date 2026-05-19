@@ -8,6 +8,9 @@ license = { text = "UNLICENSED" }
 authors = [{ name = "aeogenerator team" }]
 dependencies = [
   "fastapi>=0.115.0,<0.116",
+  "langchain-core>=0.3,<0.4",
+  "langgraph>=0.6,<0.7",
+  "langsmith>=0.5,<0.6",
   "pydantic>=2.9,<3",
   "pydantic-settings>=2.5,<3",
   "supabase>=2.6,<3",
