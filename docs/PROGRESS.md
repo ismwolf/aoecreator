@@ -4,14 +4,15 @@
 > güncellenir. Manuel düzenleme yapılırsa orkestratör konfliği fark
 > eder ve kullanıcıya sorar.
 
-**Son güncelleme:** 2026-05-19 (Faz 3 C.1 SOLID protocols + Agent ABC
-iskeleti merged — TDD RED→GREEN, 6/6 conformance tests pass, mypy strict
-clean, langchain-core 0.3.86 + langgraph 0.6.11 + langsmith 0.5.2 pinned)
-**Mevcut faz:** Faz 3 C (🔄 In progress: C.1 ✅, C.2 next) — Faz 0 ✅, Faz 2 B ✅ complete
+**Son güncelleme:** 2026-05-20 (Faz 3 C.2 LangGraph checkpoint + `langgraph`
+schema merged — `AsyncPostgresSaver` helper + DSN search_path rewrite +
+DATABASE_URL Settings + 2 contract tests, 10 total pytest pass. 3 schemas
+on Cloud: public+private+langgraph.)
+**Mevcut faz:** Faz 3 C (🔄 In progress: C.1 ✅, C.2 ✅, C.3 next) — Faz 0 ✅, Faz 2 B ✅ complete
 **Mevcut alt-proje:** C — Agent Core SDK (7 sub-cycle decomposition)
-**Mevcut task:** C.2 — LangGraph StateGraph + AsyncPostgresSaver + `langgraph` schema migration
-**Sıradaki milestone:** Faz 3 C complete (C.1 ✅ + C.2 + C.3 + C.4 + C.5 + C.6 + C.7)
-**Toplam ilerleme:** 25 / ~70 task (%36) — Faz 0 +11, A.T3-T6 +4, A.T8 +1, B.1+B.2+B.3 +3, C.1 +1; A.T7 + A.T9-T14 deferred
+**Mevcut task:** C.3 — OpenRouter LLM adapter (`langchain-openai` dep + `OPENROUTER_API_KEY` Settings + `OpenRouterLLM` implementing `LLMProvider`)
+**Sıradaki milestone:** Faz 3 C complete (C.1 ✅ + C.2 ✅ + C.3 + C.4 + C.5 + C.6 + C.7)
+**Toplam ilerleme:** 26 / ~70 task (%37) — Faz 0 +11, A.T3-T6 +4, A.T8 +1, B.1+B.2+B.3 +3, C.1+C.2 +2; A.T7 + A.T9-T14 (now distributed JIT) deferred
 
 ## Faz durumları
 
@@ -75,10 +76,14 @@ Yapılacaklar (high-level master plan §4.A'dan):
 - [x] T6: `packages/shared/` Zod ↔ Pydantic parity schemas (Zod 4 source + datamodel-code-generator + drift script) — ✅ 2026-05-16 (feature/A.T6-shared-zod-pydantic-parity; 2 example schemas Site+Workspace; same-fixture parity tests both sides; review PASS + P2 `--strip-default-none` flag removed)
 - [ ] T7: `infra/docker-compose.dev.yml` (Postgres + Redis) — ⏸ **BLOCKED 2026-05-16** on missing Docker Desktop. Plan ready (`docs/plans/2026-05-16-A.T7-docker-compose-dev-plan.md`, PR #7 plan-only merged). Resume: install Docker Desktop + WSL2 backend → new branch off dev → re-dispatch code-writer with same plan. **User chose to skip ahead to A.T8** (Supabase Cloud provides managed Postgres, making local Docker dev optional)
 - [x] T8: `supabase/config.toml` + Supabase Cloud link + `.mcp.json` (MCP-first) + env schema expansion + `database.types.ts` stub — ✅ 2026-05-16 (feature/A.T8-supabase-impl; CLI bootstrap done, MCP URL=`https://mcp.supabase.com/mcp?project_ref=ngjlxlkdfgfhiookndpl`, T8.3 login + real types codegen deferred to user-interactive post-merge; review PASS)
-- [ ] T9: `@t3-oss/env-nextjs` + `pydantic-settings` env validation
+- [⏭] T9: env validation expansion — **DISTRIBUTED JIT (2026-05-20):**
+  - DATABASE_URL ✅ added in C.2 (PR #15)
+  - OPENROUTER_API_KEY → will be added in C.3
+  - REDIS_URL → will be added when Celery (Faz 4 D) ihtiyacı çıktığında
+  - gen-types CI script → can join A.T12 CI work
 - [ ] T10: Husky + commitlint + lint-staged
 - [ ] T11: `gitleaks` pre-commit
-- [ ] T12: `.github/workflows/ci.yml` (lint + test + typecheck)
+- [ ] T12: `.github/workflows/ci.yml` (lint + test + typecheck) — **HIGH PRIORITY** (PR'lar şu an CI'sız merge oluyor, risk)
 - [ ] T13: Initial README.md
 - [ ] T14: Branch protection rules (manuel GitHub UI):
   - `main`: PR + 1 approval + require CI + dismiss stale
@@ -172,12 +177,21 @@ Yapılacaklar (high-level master plan §4.A'dan):
 - [x] Deps pinned: `langchain-core==0.3.86`, `langgraph==0.6.11`, `langsmith==0.5.2` (range `>=0.3,<0.4` / `>=0.6,<0.7` / `>=0.5,<0.6`)
 - [x] All gates: ruff check, ruff format, mypy strict (9 source files), pytest -v (8 passed = 6 new + 2 health), uv lock --check
 
-### C.2 — LangGraph + AsyncPostgresSaver + `langgraph` schema (⏳ Next)
-Master plan §4.C.2:
-- [ ] `supabase/migrations/<ts>_langgraph_schema.sql` — `create schema langgraph` (PostgresSaver kendi tablolarını runtime'da yaratır)
-- [ ] `apps/api/src/aeogen/agents/core/checkpoint.py` — `build_postgres_saver(db_url) -> AsyncPostgresSaver` helper
-- [ ] Agent.run() pattern docs/example: `graph.compile(checkpointer=saver).ainvoke(..., config={"configurable": {"thread_id": str(ctx.execution_id)}})`
-- [ ] Conformance test: PostgresSaver instantiation + thread_id propagation
+### C.2 — LangGraph Checkpoint + `langgraph` schema (✅ 2026-05-20)
+**Spec:** `docs/specs/2026-05-20-faz3c-c2-langgraph-checkpoint-spec.md`
+**Plan:** `docs/plans/2026-05-20-faz3c-c2-langgraph-checkpoint-plan.md`
+**PR:** [#15](https://github.com/ismwolf/aoecreator/pull/15) (merged → `a554436`)
+- [x] 4 lock-in kararlar: schema-only migration, PostgresDsn validator, per-run from_conn_string lifecycle, type/contract test (no real DB)
+- [x] New migration via MCP `apply_migration(name="langgraph_schema")` → `create schema langgraph` + grants (usage to postgres+service_role, create to service_role only — no authenticated/anon)
+- [x] `apps/api/src/aeogen/agents/core/checkpoint.py` — `build_postgres_saver` async context manager wrapping `AsyncPostgresSaver.from_conn_string` with `.setup()` + DSN search_path rewrite (no schema kwarg in LangGraph 0.6.11)
+- [x] `apps/api/src/aeogen/settings.py` — `database_url: PostgresDsn` field with `repr=False` (leak prevention)
+- [x] `apps/api/.env.example` — DATABASE_URL placeholder + **Session pooler note** (port 5432 NOT 6543 — Transaction mode breaks LangGraph's BEGIN/SAVEPOINT)
+- [x] `apps/api/tests/conftest.py` — DATABASE_URL env injection at module top + `get_settings.cache_clear()` (defends against stray .env.local)
+- [x] 2 deps added (LangGraph 0.5+ split PostgresSaver into separate package): `langgraph-checkpoint-postgres==3.0.5` + `psycopg[binary]>=3.2`
+- [x] 2 contract tests in `apps/api/tests/test_checkpoint_factory.py` — async context manager assertion + signature inspection via `typing.get_type_hints` (future-annotations safe)
+- [x] All gates: ruff/format/mypy strict (10 src files)/pytest -v (10 PASS: 6 C.1 + 2 C.2 + 2 health)/uv lock --check/pnpm web typecheck+build
+- [x] `get_advisors('security')` lints: empty (langgraph schema framework-infra, no RLS warning fired)
+- [x] 3 schemas now on Cloud: `public`, `private`, `langgraph` (5 migrations total)
 
 ### C.3 — OpenRouter LLM Adapter (⏳ Blocked by C.2)
 Master plan §4.C.3:
@@ -471,3 +485,22 @@ Master plan §4.C.3:
 - **C.1 review (aeogen-code-reviewer):** PASS — spec/plan conformance ✓ (19/19 checklist), gates re-run clean, TDD discipline verified (RED→GREEN plausible, 6 meaningful assertions), no scope creep (langgraph/langsmith deps but NOT imported — for C.2 prep). P2/P3 nits: AsyncIterator deviation acknowledged, `__init_subclass__` short-circuit on intermediate abstracts noted, frozen test could spot-check more fields (all non-blocking).
 - **PR #14** → merged to dev (`f83fb54`). Feature branch deleted.
 - **Sıradaki:** C.2 — LangGraph StateGraph + AsyncPostgresSaver checkpoint + `langgraph` schema migration (Supabase'de yeni schema)
+
+### 2026-05-20
+- **C.2 brainstorm (4 user-locked kararlar):** schema-only migration (PostgresSaver auto-creates tables), `PostgresDsn` validator type, per-run `from_conn_string` lifecycle, type/factory test (no real DB).
+- **A.T9 decision:** items distributed JIT to phases that need them (DATABASE_URL → C.2 just now, OPENROUTER_API_KEY → C.3, REDIS_URL → Celery faz, gen-types CI → A.T12). A.T9 closed as "distributed" rather than single PR.
+- **C.2 spec + plan written:** `docs/specs/2026-05-20-faz3c-c2-langgraph-checkpoint-spec.md`, `docs/plans/2026-05-20-faz3c-c2-langgraph-checkpoint-plan.md`.
+- **C.2 dispatch (aeogen-code-writer):**
+  - T1: `AsyncPostgresSaver.from_conn_string` signature inspect → no `schema`/`schema_name` kwarg (branch B chosen: DSN search_path rewrite)
+  - **Plan deviation surfaced:** LangGraph 0.5+ split PostgresSaver to separate `langgraph-checkpoint-postgres` package + `psycopg[binary]` Windows için gerekli. 2 dep + uv.lock staged file set'e eklendi (10 → 11 file).
+  - T2 (TDD RED): `ModuleNotFoundError` quoted before checkpoint.py written
+  - T3: MCP `apply_migration(name="langgraph_schema")` → success; schema verify (1 row); advisors `{"lints":[]}` (langgraph schema framework-infra, no RLS warning)
+  - T4: Settings + .env.example + conftest hepsi mypy strict Success
+  - T5: checkpoint.py branch B (DSN rewrite) — `_with_search_path` uses urllib.parse to merge `options=-csearch_path=langgraph` preserving any existing query params
+  - T6 (TDD GREEN): 2/2 new tests PASS; signature test mechanic adjusted (`typing.get_type_hints` for future-annotations stringification)
+  - T7: `database.types.ts` MCP regen produced no real change (langgraph schema empty + not exposed in PostgREST) → spurious whitespace diff reverted
+  - T8: full gates green; commit `789cdad`, push `feature/C.2-langgraph-checkpoint`
+- **C.2 review (aeogen-code-reviewer):** PASS — spec/plan conformance ✓, 4 writer deviations all verified legitimate (2-dep package split, get_type_hints mechanic, 16-symbol `__all__` plan off-by-one, types.ts revert correct), gates re-run match. P3 nits non-blocking (urlencode `+` vs `%20`, conftest E402 readability).
+- **Orchestrator paranoya MCP re-check:** `get_advisors('security')` → `{"lints":[]}`, 3 schemas verified (`public`, `private`, `langgraph`)
+- **PR #15** → merged to dev (`a554436`). Feature branch deleted.
+- **Sıradaki:** C.3 — OpenRouter LLM adapter (`langchain-openai>=0.3,<0.4` dep + `OPENROUTER_API_KEY: SecretStr` Settings + `apps/api/src/aeogen/agents/providers/openrouter.py` `OpenRouterLLM(LLMProvider)` + cost extraction from response_metadata)
