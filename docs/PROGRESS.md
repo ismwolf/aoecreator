@@ -4,14 +4,14 @@
 > güncellenir. Manuel düzenleme yapılırsa orkestratör konfliği fark
 > eder ve kullanıcıya sorar.
 
-**Son güncelleme:** 2026-05-19 (Faz 2 B.3 agent SDK + pgvector PASS via
-MCP; 4 tables + pgvector 0.8.0 + 8 RLS policies + HNSW vector idx;
-advisors clean; types regenerated to 13 tables. **Faz 2 B complete.**)
-**Mevcut faz:** Faz 2 B ✅ COMPLETE — Faz 0 ✅, Faz 1 A foundation kısmen done (A.T7 ⏸, A.T9-T14 sıralı eklenecek), Faz 2 B (3/3 sub-cycles ✅)
-**Mevcut alt-proje:** —— (Faz 2 B closed; sıradaki user-choice: Faz 2 G veya Faz 3 C)
-**Mevcut task:** — (milestone kapandı, sıradaki faz seçimi gerekiyor)
-**Sıradaki milestone:** Faz 2 G (provision-org-on-signup + invite flow) **veya** Faz 3 C (Agent Core SDK — en kritik faz)
-**Toplam ilerleme:** 24 / ~70 task (%34) — Faz 0 +11, A.T3-T6 +4, A.T8 +1, B.1 +1, B.2 +1, B.3 +1; A.T7 + A.T9-T14 deferred
+**Son güncelleme:** 2026-05-19 (Faz 3 C.1 SOLID protocols + Agent ABC
+iskeleti merged — TDD RED→GREEN, 6/6 conformance tests pass, mypy strict
+clean, langchain-core 0.3.86 + langgraph 0.6.11 + langsmith 0.5.2 pinned)
+**Mevcut faz:** Faz 3 C (🔄 In progress: C.1 ✅, C.2 next) — Faz 0 ✅, Faz 2 B ✅ complete
+**Mevcut alt-proje:** C — Agent Core SDK (7 sub-cycle decomposition)
+**Mevcut task:** C.2 — LangGraph StateGraph + AsyncPostgresSaver + `langgraph` schema migration
+**Sıradaki milestone:** Faz 3 C complete (C.1 ✅ + C.2 + C.3 + C.4 + C.5 + C.6 + C.7)
+**Toplam ilerleme:** 25 / ~70 task (%36) — Faz 0 +11, A.T3-T6 +4, A.T8 +1, B.1+B.2+B.3 +3, C.1 +1; A.T7 + A.T9-T14 deferred
 
 ## Faz durumları
 
@@ -20,7 +20,7 @@ advisors clean; types regenerated to 13 tables. **Faz 2 B complete.**)
 | 0 | langchain-master skill | ✅ Done | 1 gün | T1-T11 merged 2026-05-14 (PR #2). Skill aktif: `Skill(skill="langchain-master", ...)`. T11 runtime dry-runs ilk gerçek MCP çağrısında doğrulanacak. |
 | 1 | A — Foundation bootstrap | ⏸ Blocked by Faz 0 | 1 hafta | Spec henüz yazılmadı |
 | 2 | B — Data layer + multi-tenancy | ✅ Done | 1 hafta | 3/3 sub-cycles complete: B.1 ✅ + B.2 ✅ + B.3 ✅ (2026-05-19). 13 tables + pgvector + HNSW + 24 RLS policies. Faz 2 G (provision + invite) ayrı alt-proje. |
-| 3 | C — Agent Core SDK | ⏸ Blocked by Faz 2 | 2 hafta | En kritik faz |
+| 3 | C — Agent Core SDK | 🔄 In progress | 2 hafta | C.1 ✅ (2026-05-19, PR #14) — protocols + types + Agent ABC iskeleti. C.2-C.7 sıralı. En kritik faz. |
 | 4 | D — Crawl & ingestion | ⏸ Blocked by Faz 3 | 1 hafta | Crawl4AI + Modal embed |
 | 5 | E — v1 GEO agent suite (5 teknik) | ⏸ Blocked by Faz 4 | 3 hafta | 5 Analyzer + 5 Generator + Orchestrator |
 | 6 | F + G — Dashboard + Auth (paralel) | ⏸ Blocked by Faz 5 | 2 hafta | Next.js + Supabase Auth + Org |
@@ -156,17 +156,59 @@ Yapılacaklar (high-level master plan §4.A'dan):
 
 ---
 
-## Faz 3 (C) — Agent Core SDK (⏸ Blocked)
+## Faz 3 (C) — Agent Core SDK (🔄 In progress: C.1 done)
 
-**Spec/Plan:** Henüz yazılmadı.
-Master plan §4.C'den özet:
-- [ ] C.1: SOLID protocols (LLMProvider, EmbeddingProvider, MemoryBackend, SkillProvider, AgentTool, Agent ABC)
-- [ ] C.2: LangGraph entegrasyonu + PostgresSaver checkpoint
-- [ ] C.3: OpenRouter LLM adapter + per-agent model + cost tracking + fallback chain
-- [ ] C.4: Memory backend (cache + long-term, pgvector retrieval)
-- [ ] C.5: Skill registry (DB + filesystem)
-- [ ] C.6: Telemetry (LangSmith + OTel + Sentry + `agent_executions`)
-- [ ] C.7: Tests (pytest-asyncio + Testcontainers Postgres+Redis)
+### C.1 — SOLID Protocols + Types + Agent ABC iskeleti (✅ 2026-05-19)
+**Spec:** `docs/specs/2026-05-19-faz3c-c1-protocols-spec.md`
+**Plan:** `docs/plans/2026-05-19-faz3c-c1-protocols-plan.md`
+**PR:** [#14](https://github.com/ismwolf/aoecreator/pull/14) (merged → `f83fb54`)
+- [x] `langchain-master` skill consultation (MCP docs unavailable — answer from training + opinion)
+- [x] 8 lock-in kararlar (typing.Protocol vs ABC vs BaseModel split, module path `apps/api/src/aeogen/agents/core/`, AgentContext 3-field minimal, mypy+pytest conformance strategy, DB-only SkillProvider, LangChain >=0.3,<0.4 pin, langgraph schema → C.2, OPENROUTER_API_KEY → C.3)
+- [x] 5 `typing.Protocol` (LLMProvider, EmbeddingProvider, MemoryBackend, SkillProvider, AgentTool) with `@runtime_checkable`
+- [x] 6 Pydantic BaseModels (Message, LLMResponse, LLMChunk, MemoryHit, Skill, AgentContext) — all `extra="forbid", frozen=True`
+- [x] `Agent` ABC: 4 ClassVars + `__init_subclass__` validator (raises TypeError) + `__init__(llm, memory, skills, *, callbacks=None)` + abstract `run()`
+- [x] `callbacks.py` iskeleti: `CostTracker` + `LangSmithTraceHandler` (raise NotImplementedError, C.6 doldurur)
+- [x] **TDD RED→GREEN:** test file written first → `ModuleNotFoundError` confirmed → 4 modules implemented → 6/6 tests PASS
+- [x] Deps pinned: `langchain-core==0.3.86`, `langgraph==0.6.11`, `langsmith==0.5.2` (range `>=0.3,<0.4` / `>=0.6,<0.7` / `>=0.5,<0.6`)
+- [x] All gates: ruff check, ruff format, mypy strict (9 source files), pytest -v (8 passed = 6 new + 2 health), uv lock --check
+
+### C.2 — LangGraph + AsyncPostgresSaver + `langgraph` schema (⏳ Next)
+Master plan §4.C.2:
+- [ ] `supabase/migrations/<ts>_langgraph_schema.sql` — `create schema langgraph` (PostgresSaver kendi tablolarını runtime'da yaratır)
+- [ ] `apps/api/src/aeogen/agents/core/checkpoint.py` — `build_postgres_saver(db_url) -> AsyncPostgresSaver` helper
+- [ ] Agent.run() pattern docs/example: `graph.compile(checkpointer=saver).ainvoke(..., config={"configurable": {"thread_id": str(ctx.execution_id)}})`
+- [ ] Conformance test: PostgresSaver instantiation + thread_id propagation
+
+### C.3 — OpenRouter LLM Adapter (⏳ Blocked by C.2)
+Master plan §4.C.3:
+- [ ] `apps/api/src/aeogen/agents/providers/openrouter.py` — `OpenRouterLLM` class implementing `LLMProvider`
+- [ ] `langchain-openai>=0.3,<0.4` dep
+- [ ] `Settings` extension: `OPENROUTER_API_KEY: SecretStr`, `OPENROUTER_BASE_URL` (default `https://openrouter.ai/api/v1`)
+- [ ] Per-agent model override (`default_llm` ClassVar) + fallback chain via `extra_body={"route": "fallback", "models": [...]}`
+- [ ] Cost extraction from response headers/metadata
+- [ ] Negative tests: API error → exception, model unavailable → fallback used
+
+### C.4 — Memory Backend (⏳ Blocked by C.3)
+- [ ] `apps/api/src/aeogen/agents/providers/supabase_memory.py` — `SupabaseMemoryBackend` implementing `MemoryBackend` (B.3 `agent_memory` table)
+- [ ] Vector search via pgvector hybrid (embeddings → cosine + sparse jsonb)
+- [ ] TTL eviction respect (`expires_at`)
+- [ ] hit_count increment + promotion threshold
+
+### C.5 — Skill Registry (⏳ Blocked by C.3)
+- [ ] `apps/api/src/aeogen/agents/providers/supabase_skills.py` — `SupabaseSkillProvider` (B.3 `agent_skills` table, version + source)
+- [ ] Per-agent skill_key cache (in-process LRU)
+
+### C.6 — Telemetry (⏳ Blocked by C.5)
+- [ ] `CostTracker.on_llm_end` body (UPDATE agent_executions.llm_cost)
+- [ ] `LangSmithTraceHandler.on_llm_start` body (capture trace_id into agent_executions.trace_id)
+- [ ] LangSmith env: `LANGCHAIN_TRACING_V2=true`, `LANGCHAIN_PROJECT=aeogen-prod`
+- [ ] Sentry + OpenTelemetry FastAPI auto-instrument
+
+### C.7 — Tests (⏳ Blocked by C.6)
+- [ ] pytest-asyncio integration tests
+- [ ] Testcontainers Postgres + Redis (for full agent run with real checkpoint + memory)
+- [ ] End-to-end fake LLM smoke test
+- [ ] Coverage threshold 80% on `aeogen.agents.core`
 
 ---
 
@@ -415,4 +457,17 @@ Master plan §4.C'den özet:
 - **Orchestrator paranoya re-check (MCP):** `get_advisors('security')` → `{"lints":[]}`; `pg_policies` count agent_memory=3, agent_skills=1, embeddings=3, audit_log=1; `embeddings_vector_hnsw` index present.
 - **PR #13** → merged to dev (`8566de2`). Feature branch deleted.
 - **Faz 2 B COMPLETE ✅** — 3/3 sub-cycles (B.1+B.2+B.3) merged. 13 tables, ~39 RLS policies, pgvector + HNSW foundation ready.
-- **Sıradaki seçim:** Faz 2 G (provision-org-on-signup Edge Function + invite flow) **veya** Faz 3 C (Agent Core SDK — master plan §4.C, 2 hafta, en kritik faz). Kullanıcı kararı bekleniyor.
+- **Kullanıcı seçimi:** Faz 3 C — Agent Core SDK (en kritik faz). C.1 ile başla.
+- **`langchain-master` skill consultation:** MCP docs (`mcp__docs-langchain__*`) bu environment'ta yüklenmemiş — skill T11 runtime check'i first invocation'da düştü. Cevap training'den + langchain practitioner judgment'tan. 5 lock-in öneri verildi (Protocol+ABC+BaseModel split, OpenRouter via ChatOpenAI+base_url C.3'te, cost tracking AsyncCallbackHandler ile, Agent ABC callback wiring sahibi, langgraph schema C.2'de).
+- **C.1 brainstorm (8 user-locked kararlar):** scope (protocols+types+ABC iskeleti, no test fakes), langgraph schema timing (C.2), AgentContext minimal 3-field, test strategy (mypy strict + Protocol conformance), module path (`apps/api/src/aeogen/agents/core/`), OPENROUTER_API_KEY (C.3), SkillProvider DB-only, LangChain pin `>=0.3,<0.4`.
+- **C.1 spec + plan written:** `docs/specs/2026-05-19-faz3c-c1-protocols-spec.md`, `docs/plans/2026-05-19-faz3c-c1-protocols-plan.md`.
+- **C.1 dispatch (aeogen-code-writer):**
+  - T1: 3 deps added to pyproject.toml; `uv sync` resolved 84 packages (langchain-core 0.3.86, langgraph 0.6.11 + checkpoint/prebuilt/sdk + langsmith 0.5.2)
+  - T2 (TDD RED): tests/test_agent_core_protocols.py written first → `ModuleNotFoundError: No module named 'aeogen.agents'` ✓ (proves failing state)
+  - T3-T6: 4 modules implemented (types.py 78L, protocols.py 108L, base.py 70L, callbacks.py 49L); per-file mypy strict each Success
+  - T7 (TDD GREEN): 6/6 tests PASS (Protocol conformance, ABC requires-ClassVars, invalid kind reject, technique_id range reject, valid subclass OK, AgentContext frozen)
+  - T8: full gates green (ruff/format/mypy strict on 9 src files/pytest 8 passed/uv lock check); commit `e2077f9`, push `feature/C.1-agent-protocols`
+- **C.1 justified deviations:** `AsyncIterator` from `collections.abc` (ruff UP035 modern), `pytest.raises(ValidationError)` narrowed, `# noqa: ANN401` on `db_session: Any` (matches spec Risks decision)
+- **C.1 review (aeogen-code-reviewer):** PASS — spec/plan conformance ✓ (19/19 checklist), gates re-run clean, TDD discipline verified (RED→GREEN plausible, 6 meaningful assertions), no scope creep (langgraph/langsmith deps but NOT imported — for C.2 prep). P2/P3 nits: AsyncIterator deviation acknowledged, `__init_subclass__` short-circuit on intermediate abstracts noted, frozen test could spot-check more fields (all non-blocking).
+- **PR #14** → merged to dev (`f83fb54`). Feature branch deleted.
+- **Sıradaki:** C.2 — LangGraph StateGraph + AsyncPostgresSaver checkpoint + `langgraph` schema migration (Supabase'de yeni schema)
