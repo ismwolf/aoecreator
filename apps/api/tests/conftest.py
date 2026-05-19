@@ -19,6 +19,8 @@ from httpx import ASGITransport, AsyncClient
 os.environ.setdefault("SUPABASE_URL", "https://test.supabase.co")
 os.environ.setdefault("SUPABASE_PUBLISHABLE_KEY", "sb_publishable_test_" + "x" * 20)
 os.environ.setdefault("SUPABASE_SECRET_KEY", "sb_secret_test_" + "x" * 20)
+# C.2: DATABASE_URL is required by Settings. Fake DSN — tests never connect.
+os.environ.setdefault("DATABASE_URL", "postgresql://test:test@localhost:5432/test")
 
 from aeogen.main import create_app
 from aeogen.settings import get_settings
