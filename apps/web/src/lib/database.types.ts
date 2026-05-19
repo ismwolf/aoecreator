@@ -89,6 +89,98 @@ export type Database = {
           },
         ]
       }
+      agent_memory: {
+        Row: {
+          agent_name: string
+          cached_at: string
+          created_at: string
+          deleted_at: string | null
+          expires_at: string | null
+          hit_count: number
+          id: string
+          key: string
+          promoted: boolean
+          scope: string
+          updated_at: string
+          value: Json | null
+          workspace_id: string | null
+        }
+        Insert: {
+          agent_name: string
+          cached_at?: string
+          created_at?: string
+          deleted_at?: string | null
+          expires_at?: string | null
+          hit_count?: number
+          id?: string
+          key: string
+          promoted?: boolean
+          scope: string
+          updated_at?: string
+          value?: Json | null
+          workspace_id?: string | null
+        }
+        Update: {
+          agent_name?: string
+          cached_at?: string
+          created_at?: string
+          deleted_at?: string | null
+          expires_at?: string | null
+          hit_count?: number
+          id?: string
+          key?: string
+          promoted?: boolean
+          scope?: string
+          updated_at?: string
+          value?: Json | null
+          workspace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_memory_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      agent_skills: {
+        Row: {
+          agent_name: string
+          content: string
+          created_at: string
+          deleted_at: string | null
+          id: string
+          skill_key: string
+          source: string
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          agent_name: string
+          content: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          skill_key: string
+          source?: string
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          agent_name?: string
+          content?: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          skill_key?: string
+          source?: string
+          updated_at?: string
+          version?: number
+        }
+        Relationships: []
+      }
       analysis_runs: {
         Row: {
           created_at: string
@@ -139,6 +231,108 @@ export type Database = {
           },
           {
             foreignKeyName: "analysis_runs_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      audit_log: {
+        Row: {
+          action: string
+          actor: string | null
+          id: string
+          metadata: Json
+          org_id: string
+          resource: string
+          ts: string
+          workspace_id: string | null
+        }
+        Insert: {
+          action: string
+          actor?: string | null
+          id?: string
+          metadata?: Json
+          org_id: string
+          resource: string
+          ts?: string
+          workspace_id?: string | null
+        }
+        Update: {
+          action?: string
+          actor?: string | null
+          id?: string
+          metadata?: Json
+          org_id?: string
+          resource?: string
+          ts?: string
+          workspace_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "audit_log_org_id_fkey"
+            columns: ["org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "audit_log_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspaces"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      embeddings: {
+        Row: {
+          chunk_id: number
+          content: string
+          created_at: string
+          deleted_at: string | null
+          embedding: string
+          embedding_sparse: Json
+          id: string
+          page_id: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          chunk_id: number
+          content: string
+          created_at?: string
+          deleted_at?: string | null
+          embedding: string
+          embedding_sparse?: Json
+          id?: string
+          page_id: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          chunk_id?: number
+          content?: string
+          created_at?: string
+          deleted_at?: string | null
+          embedding?: string
+          embedding_sparse?: Json
+          id?: string
+          page_id?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "embeddings_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "embeddings_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "workspaces"
