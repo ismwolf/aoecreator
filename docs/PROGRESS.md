@@ -4,14 +4,14 @@
 > güncellenir. Manuel düzenleme yapılırsa orkestratör konfliği fark
 > eder ve kullanıcıya sorar.
 
-**Son güncelleme:** 2026-05-19 (Faz 2 B.2 domain entities PASS via MCP;
-5 tables + 15 RLS policies + 15 partial indexes; advisors clean;
-types regenerated to 9 tables)
-**Mevcut faz:** Faz 2 B (🔄 In progress: B.1 ✅, B.2 ✅, B.3 next) — Faz 0 ✅, Faz 1 A foundation kısmen done (A.T7 ⏸, A.T9-T14 sıralı eklenecek)
-**Mevcut alt-proje:** B — Data layer + multi-tenancy (3 sub-cycle decomposition)
-**Mevcut task:** B.3 — agent_memory + agent_skills + embeddings (pgvector enable) + audit_log (4 tables)
-**Sıradaki milestone:** Faz 2 B complete (B.1 ✅ + B.2 ✅ + B.3, ~1-2 saat kaldı)
-**Toplam ilerleme:** 23 / ~70 task (%33) — Faz 0 +11, A.T3-T6 +4, A.T8 +1, B.1 +1, B.2 +1; A.T7 + A.T9-T14 deferred
+**Son güncelleme:** 2026-05-19 (Faz 2 B.3 agent SDK + pgvector PASS via
+MCP; 4 tables + pgvector 0.8.0 + 8 RLS policies + HNSW vector idx;
+advisors clean; types regenerated to 13 tables. **Faz 2 B complete.**)
+**Mevcut faz:** Faz 2 B ✅ COMPLETE — Faz 0 ✅, Faz 1 A foundation kısmen done (A.T7 ⏸, A.T9-T14 sıralı eklenecek), Faz 2 B (3/3 sub-cycles ✅)
+**Mevcut alt-proje:** —— (Faz 2 B closed; sıradaki user-choice: Faz 2 G veya Faz 3 C)
+**Mevcut task:** — (milestone kapandı, sıradaki faz seçimi gerekiyor)
+**Sıradaki milestone:** Faz 2 G (provision-org-on-signup + invite flow) **veya** Faz 3 C (Agent Core SDK — en kritik faz)
+**Toplam ilerleme:** 24 / ~70 task (%34) — Faz 0 +11, A.T3-T6 +4, A.T8 +1, B.1 +1, B.2 +1, B.3 +1; A.T7 + A.T9-T14 deferred
 
 ## Faz durumları
 
@@ -19,7 +19,7 @@ types regenerated to 9 tables)
 |---|---|---|---|---|
 | 0 | langchain-master skill | ✅ Done | 1 gün | T1-T11 merged 2026-05-14 (PR #2). Skill aktif: `Skill(skill="langchain-master", ...)`. T11 runtime dry-runs ilk gerçek MCP çağrısında doğrulanacak. |
 | 1 | A — Foundation bootstrap | ⏸ Blocked by Faz 0 | 1 hafta | Spec henüz yazılmadı |
-| 2 | B — Data layer + multi-tenancy | ⏸ Blocked by Faz 1 | 1 hafta | — |
+| 2 | B — Data layer + multi-tenancy | ✅ Done | 1 hafta | 3/3 sub-cycles complete: B.1 ✅ + B.2 ✅ + B.3 ✅ (2026-05-19). 13 tables + pgvector + HNSW + 24 RLS policies. Faz 2 G (provision + invite) ayrı alt-proje. |
 | 3 | C — Agent Core SDK | ⏸ Blocked by Faz 2 | 2 hafta | En kritik faz |
 | 4 | D — Crawl & ingestion | ⏸ Blocked by Faz 3 | 1 hafta | Crawl4AI + Modal embed |
 | 5 | E — v1 GEO agent suite (5 teknik) | ⏸ Blocked by Faz 4 | 3 hafta | 5 Analyzer + 5 Generator + Orchestrator |
@@ -124,12 +124,30 @@ Yapılacaklar (high-level master plan §4.A'dan):
 - [x] `database.types.ts` regenerated via MCP — 9 tables (B.1 + B.2) typed
 - [x] Local migration mirror: `supabase/migrations/20260519000000_b2_domain.sql` (266 lines)
 
-### B.3 — Agent SDK support (⏳ Pending)
-- [ ] agent_memory (agent_name, scope, key, value, cached_at)
-- [ ] agent_skills (agent_name, skill_key, content, source)
-- [ ] embeddings (page_id, chunk_id, content, vector(1024), embedding_sparse jsonb) — pgvector enable
-- [ ] audit_log (org_id, actor, action, resource, ts)
-- [ ] RLS + indexes (including pgvector hybrid hnsw + sparse)
+### B.3 — Agent SDK support (✅ 2026-05-19) — closes Faz 2 B
+**Spec:** `docs/specs/2026-05-19-faz2b-b3-agent-sdk-spec.md`
+**Plan:** `docs/plans/2026-05-19-faz2b-b3-agent-sdk-plan.md`
+**PR:** [#13](https://github.com/ismwolf/aoecreator/pull/13) (merged → `8566de2`)
+- [x] `pgvector` extension 0.8.0 installed in `extensions` schema (was null pre-migration)
+- [x] 4 tablo via MCP `apply_migration`: agent_memory, agent_skills, embeddings, audit_log
+- [x] `agent_memory.scope` 3-value enum (`global`/`workspace`/`agent`) + invariant CHECK constraint smoke-tested with 3 cases (1 başarılı, 2 expected fail)
+- [x] `embeddings` HNSW cosine index (m=16, ef_construction=64) — Supabase default, BGE-M3 1024-dim production-ready
+- [x] `audit_log` append-only (no `updated_at`, no `deleted_at`, no moddatetime trigger, no INSERT/UPDATE/DELETE app-level policies — service_role only)
+- [x] `agent_skills` global registry (no `workspace_id`) — SELECT to authenticated, mutations service_role only; version + source enum (`builtin`/`promoted`/`manual`)
+- [x] 8 RLS policies: agent_memory 3 (mixed scope SELECT + workspace-only INSERT/UPDATE), agent_skills 1 (SELECT-open), embeddings 3 (B.2 workspace pattern), audit_log 1 (SELECT via `private.is_org_admin(org_id)`)
+- [x] 3 unique partial indexes + 10 perf indexes + 1 HNSW vector index
+- [x] 3 moddatetime triggers (audit_log skipped — append-only)
+- [x] `get_advisors('security')` lints: empty (paranoia re-check post-merge confirmed)
+- [x] `database.types.ts` regenerated → 13 tables; `embeddings.embedding` surfaces as TS `string` (expected — Faz 4 D will add vector serde wrapper)
+- [x] Local migration mirror: `supabase/migrations/20260519010000_b3_agent_sdk.sql` (253 lines)
+
+### Faz 2 B — COMPLETE ✅ (2026-05-19)
+- **13 tables** in `public` schema (B.1: 4 tenancy + B.2: 5 domain + B.3: 4 agent SDK)
+- **~39 RLS policies** total (B.1: 16, B.2: 15, B.3: 8 — all `TO authenticated` + `WITH CHECK` on writes)
+- `pgvector` 0.8.0 enabled + HNSW cosine index — hybrid retrieval foundation ready
+- 3 PR merged: [#11](https://github.com/ismwolf/aoecreator/pull/11) (B.1) + [#12](https://github.com/ismwolf/aoecreator/pull/12) (B.2) + [#13](https://github.com/ismwolf/aoecreator/pull/13) (B.3)
+- `private` schema helpers operational: `user_workspace_ids()`, `current_org_id()`, `is_org_admin(uuid)`
+- MCP-first migration workflow proven (3/3 success, all atomic, all `get_advisors('security')` clean)
 
 ### Faz 2 G (separate alt-proje, after B.3)
 - [ ] `provision-org-on-signup` Edge Function
@@ -383,4 +401,18 @@ Master plan §4.C'den özet:
 - **B.2 review (aeogen-code-reviewer):** PASS — plan-conformance ✓, spec-conformance line-by-line ✓, RLS audit clean (`private.user_workspace_ids()` doğru kullanılmış, `WITH CHECK` her INSERT/UPDATE'te, soft-delete pattern korunmuş, kicked_by SET NULL). P3 nits: reviewer MCP'siz çalıştığı için orchestrator paranoya re-check istedi.
 - **Orchestrator paranoya re-check (MCP):** `get_advisors('security')` → `{"lints":[]}`, `pg_policies` count → 15 (5 tablo × 3), `list_tables` → 9 tables hep `rls_enabled=true`. Writer ayrıca her tabloya helpful `comment` eklemiş (`Client websites under a workspace`, `Crawled pages...`, vb.).
 - **PR #12** → merged to dev (`48c0dec`). Feature branch deleted.
-- **Sıradaki:** B.3 — agent SDK support (4 tablo: agent_memory, agent_skills, embeddings + pgvector enable, audit_log)
+- **B.3 brainstorm (4 user-locked kararlar):** agent_memory.scope = 3-value enum ('global'/'workspace'/'agent') + invariant CHECK; embeddings HNSW cosine m=16 ef_construction=64 (Supabase default); audit_log org_id NOT NULL + workspace_id nullable + append-only (no app mutation policies, service_role only); agent_skills global registry (no workspace_id).
+- **B.3 spec + plan written:** `docs/specs/2026-05-19-faz2b-b3-agent-sdk-spec.md`, `docs/plans/2026-05-19-faz2b-b3-agent-sdk-plan.md`.
+- **B.3 dispatch (aeogen-code-writer):**
+  - T0: `list_extensions` → `vector 0.8.0 available, installed_version=null`. Migration will install. Green.
+  - T1: 253-line SQL → `supabase/migrations/20260519010000_b3_agent_sdk.sql`
+  - T2: MCP `apply_migration(name="b3_agent_sdk", ...)` → success (atomic, no rollback). pgvector installed.
+  - T3: `list_tables(public)` → 13 tables, B.3'ün 4'ü `rls_enabled=true`; `get_advisors('security')` → `{"lints":[]}`; `list_extensions` → `vector installed_version=0.8.0`. Policy counts: agent_memory=3, agent_skills=1, embeddings=3, audit_log=1. HNSW idx present. **Invariant CHECK smoke-test**: 3 case (1 valid → success, 2 invalid → SQLSTATE 23514 reject), behavior exactly as designed.
+  - T4: `database.types.ts` regenerated via MCP → 13 tables (`embeddings.embedding` → TS `string`, expected)
+  - T5: typecheck/lint/build all exit 0
+  - T6: commit `67f4fae` + push `feature/B.3-agent-sdk-support`
+- **B.3 review (aeogen-code-reviewer):** PASS — line-by-line spec-conformance (19/19 checklist items), RLS audit clean, no scope creep, no secrets. P2 nit: audit_log append-only enforced only by absence of policies (acknowledged in spec Risks, deny-policies deferred). P3 nits: workspace_id consistency trigger + agent_memory.value byte cap deferred to v1.5 per spec Open Questions.
+- **Orchestrator paranoya re-check (MCP):** `get_advisors('security')` → `{"lints":[]}`; `pg_policies` count agent_memory=3, agent_skills=1, embeddings=3, audit_log=1; `embeddings_vector_hnsw` index present.
+- **PR #13** → merged to dev (`8566de2`). Feature branch deleted.
+- **Faz 2 B COMPLETE ✅** — 3/3 sub-cycles (B.1+B.2+B.3) merged. 13 tables, ~39 RLS policies, pgvector + HNSW foundation ready.
+- **Sıradaki seçim:** Faz 2 G (provision-org-on-signup Edge Function + invite flow) **veya** Faz 3 C (Agent Core SDK — master plan §4.C, 2 hafta, en kritik faz). Kullanıcı kararı bekleniyor.
