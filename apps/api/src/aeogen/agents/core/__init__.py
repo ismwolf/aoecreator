@@ -2,6 +2,7 @@
 
 from aeogen.agents.core.base import Agent, AgentKind
 from aeogen.agents.core.callbacks import CostTracker, LangSmithTraceHandler
+from aeogen.agents.core.checkpoint import build_postgres_saver
 from aeogen.agents.core.protocols import (
     AgentTool,
     EmbeddingProvider,
@@ -25,13 +26,14 @@ __all__ = [
     "AgentTool",
     "CostTracker",
     "EmbeddingProvider",
-    "LangSmithTraceHandler",
     "LLMChunk",
     "LLMProvider",
     "LLMResponse",
+    "LangSmithTraceHandler",
     "MemoryBackend",
     "MemoryHit",
     "Message",
     "Skill",
     "SkillProvider",
+    "build_postgres_saver",
 ]

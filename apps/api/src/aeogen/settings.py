@@ -7,7 +7,7 @@ Redis / DATABASE_URL follow in A.T9 alongside their first real consumers.
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import Field, HttpUrl, SecretStr, field_validator
+from pydantic import AliasChoices, Field, HttpUrl, PostgresDsn, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -52,6 +52,19 @@ class Settings(BaseSettings):
         if not v.get_secret_value().startswith("sb_secret_"):
             raise ValueError("must be a new-format Supabase secret key (sb_secret_...)")
         return v
+
+    # Postgres direct connection (C.2). Required by AsyncPostgresSaver.
+    # NOT the Supabase API URL — that lives in `supabase_url` above.
+    database_url: PostgresDsn = Field(
+        ...,
+        validation_alias=AliasChoices("DATABASE_URL"),
+        description=(
+            "Direct Postgres connection string for AsyncPostgresSaver. "
+            "Use Supabase Session pooler (port 5432), not Transaction pooler (6543) — "
+            "LangGraph relies on BEGIN/SAVEPOINT which Transaction mode silently breaks."
+        ),
+        repr=False,
+    )
 
 
 @lru_cache(maxsize=1)
