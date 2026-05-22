@@ -10,8 +10,6 @@ regexes = [
   # Supabase placeholder keys used in CI env and .env.example files
   '''sb_publishable_placeholder_''',
   '''sb_secret_placeholder_''',
-  # pytest / .env.example dummy values
-  '''placeholder''',
 ]
 paths = [
   # Example env files are safe by definition

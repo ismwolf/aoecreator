@@ -71,6 +71,9 @@ jobs:
       - name: Test (workspace)
         run: pnpm -r test
 
+      - name: Drift check (shared Zod↔Pydantic)
+        run: pnpm --filter @aeogen/shared check:drift
+
   python-checks:
     name: Python (uv) — ruff · mypy · pytest
     runs-on: ubuntu-latest

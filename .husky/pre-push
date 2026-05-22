@@ -1,1 +1,2 @@
 pnpm -r typecheck && pnpm -r test
+cd apps/api && uv run mypy src && uv run pytest -v

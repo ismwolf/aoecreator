@@ -61,7 +61,7 @@ cd apps/api && uv run uvicorn src.aeogen.main:app --reload
 
 ```bash
 # Lint + typecheck + test (all workspaces)
-pnpm -r lint && pnpm -r typecheck && pnpm -r test
+pnpm -r lint && pnpm prettier --check . && pnpm -r typecheck && pnpm -r test
 
 # Python checks
 cd apps/api && uv run ruff check . && uv run mypy src && uv run pytest -v
