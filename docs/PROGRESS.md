@@ -4,7 +4,7 @@
 > güncellenir. Manuel düzenleme yapılırsa orkestratör konfliği fark
 > eder ve kullanıcıya sorar.
 
-**Son güncelleme:** 2026-05-22 (A.T12 CI pipeline merged — `.github/workflows/ci.yml` PR #16 → `e2232ca`. node-checks + python-checks paralel. Sıradaki: C.3 OpenRouter LLM adapter.)
+**Son güncelleme:** 2026-05-22 (A.T10+T11+T13 PR #17 açıldı — husky+lint-staged+prettier+commitlint+gitleaks+README. CI reviewer bekleniyor. packages/shared build fix: codegen:python build script'ten ayrıldı.)
 **Mevcut faz:** Faz 3 C (🔄 In progress: C.1 ✅, C.2 ✅, C.3 next) — Faz 0 ✅, Faz 2 B ✅ complete
 **Mevcut alt-proje:** C — Agent Core SDK (7 sub-cycle decomposition)
 **Mevcut task:** C.3 — OpenRouter LLM adapter (`langchain-openai` dep + `OPENROUTER_API_KEY` Settings + `OpenRouterLLM` implementing `LLMProvider`)
@@ -79,10 +79,10 @@ Yapılacaklar (high-level master plan §4.A'dan):
   - OPENROUTER_API_KEY → will be added in C.3
   - REDIS_URL → will be added when Celery (Faz 4 D) ihtiyacı çıktığında
   - gen-types CI script → can join A.T12 CI work
-- [ ] T10: Husky + commitlint + lint-staged
-- [ ] T11: `gitleaks` pre-commit
+- [x] T10: Husky + commitlint + lint-staged — 🔄 PR #17 open (feature/A.T10-T11-T13-pre-commit-readme → dev). husky v9 + lint-staged (prettier+ESLint TS/JS, ruff Python) + commitlint + prettier + prettier-plugin-tailwindcss ^0.7.4 + eslint-config-prettier. All local gates green. CI reviewer pending.
+- [x] T11: `gitleaks` pre-commit — 🔄 PR #17 (same branch). .gitleaks.toml + pre-commit graceful-skip hook + gitleaks-action@v2 CI job.
 - [x] T12: `.github/workflows/ci.yml` (lint + test + typecheck) — ✅ 2026-05-22 (feature/A.T12-ci-workflow; PR #16 merged → `e2232ca`. Two parallel jobs: node-checks pnpm typecheck/lint/build/test + python-checks uv ruff/mypy/pytest. Review PASS, P2 duplicate-run fix applied.)
-- [ ] T13: Initial README.md
+- [x] T13: Initial README.md — 🔄 PR #17 (same branch). Root README.md: monorepo structure, tech stack, setup, dev workflow, commit conventions, branch strategy.
 - [x] T14: Branch protection rules — ✅ 2026-05-22 (gh api ile uygulandı)
   - `main`: PR + 1 approval + dismiss stale + CI strict (node-checks + python-checks)
   - `test`: PR + 1 approval + CI strict
@@ -532,3 +532,20 @@ Master plan §4.C.3:
 - **Orchestrator paranoya MCP re-check:** `get_advisors('security')` → `{"lints":[]}`, 3 schemas verified (`public`, `private`, `langgraph`)
 - **PR #15** → merged to dev (`a554436`). Feature branch deleted.
 - **Sıradaki:** C.3 — OpenRouter LLM adapter (`langchain-openai>=0.3,<0.4` dep + `OPENROUTER_API_KEY: SecretStr` Settings + `apps/api/src/aeogen/agents/providers/openrouter.py` `OpenRouterLLM(LLMProvider)` + cost extraction from response_metadata)
+
+### 2026-05-22
+
+- **A.T10+T11+T13 brainstorm + spec + plan:** Full-stack pre-commit setup seçildi (Prettier + ESLint + ruff + commitlint + gitleaks). Spec: `docs/specs/2026-05-22-A.T10-pre-commit-setup-spec.md`. Plan: `docs/plans/2026-05-22-A.T10-T11-T13-pre-commit-plan.md`.
+- **A.T10+T11+T13 dispatch (aeogen-code-writer):**
+  - husky v9 + lint-staged + @commitlint/cli + @commitlint/config-conventional + prettier + prettier-plugin-tailwindcss ^0.7.4 root devDeps
+  - eslint-config-prettier in apps/web + packages/shared (flat config format)
+  - .prettierrc.json + .prettierignore + lint-staged.config.mjs (polyglot: TS/JS + Python ruff) + commitlint.config.mjs
+  - .husky/pre-commit (lint-staged + gitleaks graceful-skip) + .husky/commit-msg (commitlint) + .husky/pre-push (typecheck + test)
+  - .gitleaks.toml (allowlist: CI placeholders + lock files) + gitleaks-action@v2 CI job
+  - Root README.md: monorepo structure, tech stack, setup, dev workflow, commit conventions, branch strategy
+  - CI node-checks: prettier --check step added; gitleaks job added; pnpm/action-setup@v4 version conflict fixed
+  - packages/shared build: codegen:python ayrıldı (node-checks'te uv yok — generated files committed, check:drift validates)
+  - Deviation: lint-staged.config.mjs per-package filter for ESLint (Windows Husky PATH issue)
+  - All local gates: pnpm install ✓, typecheck ✓, lint ✓, build ✓, test ✓, prettier --check ✓, commitlint ✓, Python ruff+mypy+pytest ✓
+- **PR #17** → feature/A.T10-T11-T13-pre-commit-readme → dev (open, reviewer pending)
+- **Sıradaki:** PR #17 review PASS → merge → C.3 OpenRouter LLM adapter
