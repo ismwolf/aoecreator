@@ -12,6 +12,7 @@ from aeogen.agents.core.protocols import (
     MemoryBackend,
     SkillProvider,
 )
+from aeogen.agents.core.skills import SupabaseSkillProvider
 from aeogen.agents.core.types import (
     AgentContext,
     LLMChunk,
@@ -27,6 +28,7 @@ __all__ = [
     "AgentKind",
     "OpenRouterLLM",
     "SupabaseMemoryBackend",
+    "SupabaseSkillProvider",
     "AgentTool",
     "CostTracker",
     "EmbeddingProvider",
