@@ -82,10 +82,10 @@ Yapılacaklar (high-level master plan §4.A'dan):
 - [ ] T11: `gitleaks` pre-commit
 - [x] T12: `.github/workflows/ci.yml` (lint + test + typecheck) — ✅ 2026-05-22 (feature/A.T12-ci-workflow; PR #16 merged → `e2232ca`. Two parallel jobs: node-checks pnpm typecheck/lint/build/test + python-checks uv ruff/mypy/pytest. Review PASS, P2 duplicate-run fix applied.)
 - [ ] T13: Initial README.md
-- [ ] T14: Branch protection rules (manuel GitHub UI):
-  - `main`: PR + 1 approval + require CI + dismiss stale
-  - `test`: PR + require CI
-  - `dev`: require CI checks (when CI exists)
+- [x] T14: Branch protection rules — ✅ 2026-05-22 (gh api ile uygulandı)
+  - `main`: PR + 1 approval + dismiss stale + CI strict (node-checks + python-checks)
+  - `test`: PR + 1 approval + CI strict
+  - `dev`: CI required (strict=false), direct push serbest, no PR requirement
 
 **Verification gate:** `pnpm install` + `pnpm dev` çalışıyor; `cd apps/api && uv run uvicorn main:app --reload` ayağa kalkıyor; `docker compose up` Postgres+Redis sağlıklı; `pnpm test` ve `pnpm typecheck` yeşil; CI bir PR'da geçiyor.
 
