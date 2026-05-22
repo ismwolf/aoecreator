@@ -4,12 +4,12 @@
 > güncellenir. Manuel düzenleme yapılırsa orkestratör konfliği fark
 > eder ve kullanıcıya sorar.
 
-**Son güncelleme:** 2026-05-23 (C.3 OpenRouter LLM adapter tamamlandı. langchain-openai + OpenRouterLLM + 7 tests + mypy strict + ruff PASS. Sıradaki: C.4 Memory Backend.)
-**Mevcut faz:** Faz 3 C (🔄 In progress: C.1 ✅, C.2 ✅, C.3 ✅, C.4 next) — Faz 0 ✅, Faz 2 B ✅ complete
-**Mevcut alt-proje:** C — Agent Core SDK (7 sub-cycle decomposition)
-**Mevcut task:** C.4 — Memory Backend (`SupabaseMemoryBackend` implementing `MemoryBackend` — B.3 `agent_memory` tablosu)
-**Sıradaki milestone:** Faz 3 C complete (C.1 ✅ + C.2 ✅ + C.3 + C.4 + C.5 + C.6 + C.7)
-**Toplam ilerleme:** 26 / ~70 task (%37) — Faz 0 +11, A.T3-T6 +4, A.T8 +1, B.1+B.2+B.3 +3, C.1+C.2 +2; A.T7 + A.T9-T14 (now distributed JIT) deferred
+**Son güncelleme:** 2026-05-23 (Faz 3 C complete — C.1-C.7 ALL ✅. 44 tests, 95.9% coverage. Sıradaki: Faz 4 D — Crawl & Ingestion.)
+**Mevcut faz:** Faz 4 D (⏳ Blocked — starting) — Faz 0 ✅, Faz 2 B ✅, Faz 3 C ✅ complete
+**Mevcut alt-proje:** D — Crawl & Ingestion Pipeline
+**Mevcut task:** D.1 — Crawl4AI spider wrapper (sitemap + robots + rate limit)
+**Sıradaki milestone:** Faz 4 D complete (D.1 + D.2 + D.3)
+**Toplam ilerleme:** 33 / ~70 task (%47) — Faz 0 +11, A.T3-T6 +4, A.T8 +1, B.1+B.2+B.3 +3, C.1-C.7 +7; A.T7 + Docker deferred
 
 ## Faz durumları
 
@@ -18,8 +18,8 @@
 | 0   | langchain-master skill             | ✅ Done            | 1 gün        | T1-T11 merged 2026-05-14 (PR #2). Skill aktif: `Skill(skill="langchain-master", ...)`. T11 runtime dry-runs ilk gerçek MCP çağrısında doğrulanacak.         |
 | 1   | A — Foundation bootstrap           | ⏸ Blocked by Faz 0 | 1 hafta      | Spec henüz yazılmadı                                                                                                                                        |
 | 2   | B — Data layer + multi-tenancy     | ✅ Done            | 1 hafta      | 3/3 sub-cycles complete: B.1 ✅ + B.2 ✅ + B.3 ✅ (2026-05-19). 13 tables + pgvector + HNSW + 24 RLS policies. Faz 2 G (provision + invite) ayrı alt-proje. |
-| 3   | C — Agent Core SDK                 | 🔄 In progress     | 2 hafta      | C.1 ✅ (2026-05-19, PR #14) — protocols + types + Agent ABC iskeleti. C.2-C.7 sıralı. En kritik faz.                                                        |
-| 4   | D — Crawl & ingestion              | ⏸ Blocked by Faz 3 | 1 hafta      | Crawl4AI + Modal embed                                                                                                                                      |
+| 3   | C — Agent Core SDK                 | ✅ Done            | 2 hafta      | C.1-C.7 ALL done (2026-05-23). 44 tests, 95.9% coverage. PRs #14-#22.                                                                                       |
+| 4   | D — Crawl & ingestion              | 🔄 In progress     | 1 hafta      | Crawl4AI + Modal embed. Unblocked 2026-05-23 after Faz 3 C complete.                                                                                        |
 | 5   | E — v1 GEO agent suite (5 teknik)  | ⏸ Blocked by Faz 4 | 3 hafta      | 5 Analyzer + 5 Generator + Orchestrator                                                                                                                     |
 | 6   | F + G — Dashboard + Auth (paralel) | ⏸ Blocked by Faz 5 | 2 hafta      | Next.js + Supabase Auth + Org                                                                                                                               |
 | 7   | H — Observability + Ops            | ⏸ Blocked by Faz 6 | 1 hafta      | LangSmith + Sentry + OTel                                                                                                                                   |
@@ -168,7 +168,7 @@ Yapılacaklar (high-level master plan §4.A'dan):
 
 ---
 
-## Faz 3 (C) — Agent Core SDK (🔄 In progress: C.1 done)
+## Faz 3 (C) — Agent Core SDK (✅ Done — 2026-05-23)
 
 ### C.1 — SOLID Protocols + Types + Agent ABC iskeleti (✅ 2026-05-19)
 
@@ -221,31 +221,51 @@ Yapılacaklar (high-level master plan §4.A'dan):
 
 **Review (aeogen-code-reviewer):** PASS — Protocol conformance ✓, SecretStr security ✓, fallback chain shape ✓, test coverage ✓. P2 findings addressed (base_url assertion + max_tokens test + auto-summarize TODO comment).
 
-### C.4 — Memory Backend (⏳ Unblocked — C.3 done)
+### C.4 — Memory Backend (✅ 2026-05-23)
 
-- [ ] `apps/api/src/aeogen/agents/providers/supabase_memory.py` — `SupabaseMemoryBackend` implementing `MemoryBackend` (B.3 `agent_memory` table)
-- [ ] Vector search via pgvector hybrid (embeddings → cosine + sparse jsonb)
-- [ ] TTL eviction respect (`expires_at`)
-- [ ] hit_count increment + promotion threshold
+**PR:** [#19](https://github.com/ismwolf/aoecreator/pull/19) (merged → dev)
 
-### C.5 — Skill Registry (⏳ Blocked by C.3)
+- [x] `apps/api/src/aeogen/agents/core/memory.py` — `SupabaseMemoryBackend` implementing `MemoryBackend` protocol
+- [x] psycopg3 async + direct SQL against B.3 `agent_memory` table
+- [x] `get()`: SELECT + TTL filter + hit_count increment + auto-promotion at threshold 3
+- [x] `set()`: UPSERT via `ON CONFLICT` on coalesce-based partial unique index
+- [x] `search()`: ILIKE key/value text search + score=1.0 baseline (vector search deferred to D-cycle)
+- [x] 9 mocked unit tests — ruff/mypy strict clean
 
-- [ ] `apps/api/src/aeogen/agents/providers/supabase_skills.py` — `SupabaseSkillProvider` (B.3 `agent_skills` table, version + source)
-- [ ] Per-agent skill_key cache (in-process LRU)
+### C.5 — Skill Registry (✅ 2026-05-23)
 
-### C.6 — Telemetry (⏳ Blocked by C.5)
+**PR:** [#20](https://github.com/ismwolf/aoecreator/pull/20) (merged → dev)
 
-- [ ] `CostTracker.on_llm_end` body (UPDATE agent_executions.llm_cost)
-- [ ] `LangSmithTraceHandler.on_llm_start` body (capture trace_id into agent_executions.trace_id)
-- [ ] LangSmith env: `LANGCHAIN_TRACING_V2=true`, `LANGCHAIN_PROJECT=aeogen-prod`
-- [ ] Sentry + OpenTelemetry FastAPI auto-instrument
+- [x] `apps/api/src/aeogen/agents/core/skills.py` — `SupabaseSkillProvider` implementing `SkillProvider` protocol
+- [x] `get_skill()`: optional version pin; defaults to latest (ORDER BY version DESC)
+- [x] `list_skills()`: DISTINCT ON (skill_key) — one row per skill (latest version)
+- [x] 6 mocked unit tests — ruff/mypy strict clean
 
-### C.7 — Tests (⏳ Blocked by C.6)
+### C.6 — Telemetry (✅ 2026-05-23)
 
-- [ ] pytest-asyncio integration tests
-- [ ] Testcontainers Postgres + Redis (for full agent run with real checkpoint + memory)
-- [ ] End-to-end fake LLM smoke test
-- [ ] Coverage threshold 80% on `aeogen.agents.core`
+**PR:** [#21](https://github.com/ismwolf/aoecreator/pull/21) (merged → dev)
+
+- [x] `CostTracker.on_llm_end`: extract token usage → 7-model pricing table → log + UPDATE `agent_executions.llm_cost`
+- [x] `LangSmithTraceHandler.on_llm_start`: capture `run_id` → UPDATE `agent_executions.trace_id`
+- [x] Both handlers swallow DB errors — telemetry never raises into LLM call chain
+- [x] 7 mocked unit tests including pricing accuracy + error resilience
+
+### C.7 — Tests (✅ 2026-05-23)
+
+**PR:** [#22](https://github.com/ismwolf/aoecreator/pull/22) (merged → dev)
+
+- [x] 5 Agent SDK smoke tests: end-to-end run (fake LLM + memory + skills), callback wiring, Protocol runtime conformance
+- [x] Protocol `isinstance` checks for all 3 concrete impls (SupabaseMemoryBackend, SupabaseSkillProvider, FakeLLM)
+- [x] Coverage config: `fail_under=80`, `pytest-cov>=7.1` added to dev deps
+- [x] 95.9% coverage on `aeogen.agents.core` (44 tests pass)
+- [x] Testcontainers integration tests deferred — Docker Desktop not installed (A.T7 blocked)
+
+### Faz 3 C — COMPLETE ✅ (2026-05-23)
+
+- **7 sub-cycles** all done: C.1 protocols + C.2 checkpoint + C.3 LLM + C.4 memory + C.5 skills + C.6 telemetry + C.7 tests
+- **44 unit tests** — 95.9% coverage on `aeogen.agents.core`
+- **13 source files** — mypy strict + ruff clean
+- PRs: [#14](https://github.com/ismwolf/aoecreator/pull/14) + [#15](https://github.com/ismwolf/aoecreator/pull/15) + [#18](https://github.com/ismwolf/aoecreator/pull/18) + [#19](https://github.com/ismwolf/aoecreator/pull/19) + [#20](https://github.com/ismwolf/aoecreator/pull/20) + [#21](https://github.com/ismwolf/aoecreator/pull/21) + [#22](https://github.com/ismwolf/aoecreator/pull/22)
 
 ---
 
@@ -560,4 +580,9 @@ Yapılacaklar (high-level master plan §4.A'dan):
 ### 2026-05-23
 
 - **C.3 ✅ OpenRouter LLM adapter** — `OpenRouterLLM(LLMProvider)` via `langchain-openai` + `ChatOpenAI` pointed at `openrouter.ai/api/v1`. `langchain-openai>=0.3,<0.4` dep added. Settings: `openrouter_api_key: SecretStr` + `openrouter_base_url: HttpUrl` + `openrouter_default_model: str`. Fallback chain via `extra_body={"route": "fallback", "models": [...]}`. Token budget warning >32k (auto-summarize deferred to C.4+). 7 tests PASS, mypy strict PASS, ruff PASS. Code review: PASS (P2 findings addressed — base_url assertion + max_tokens test + TODO comment).
-- **Sıradaki:** C.4 — Memory Backend (`SupabaseMemoryBackend` implementing `MemoryBackend`, B.3 `agent_memory` tablosu + pgvector hybrid search)
+- **C.4 ✅ Memory Backend** (PR #19) — `SupabaseMemoryBackend` implementing `MemoryBackend` via psycopg3 async. `get()`: SELECT + TTL filter + hit_count++ + auto-promotion @3. `set()`: UPSERT `ON CONFLICT` on `coalesce(workspace_id::text,'')` partial unique index. `search()`: ILIKE key/value (vector deferred to D). SIM117 ruff fix: combined `async with conn, conn.cursor() as cur:`. 9 mocked tests PASS. mypy strict + ruff clean.
+- **C.5 ✅ Skill Registry** (PR #20) — `SupabaseSkillProvider` implementing `SkillProvider`. `get_skill()`: optional version pin, latest = `ORDER BY version DESC LIMIT 1`. `list_skills()`: `DISTINCT ON (skill_key)` one row per skill. `source=str(row["source"])` → `# type: ignore[arg-type]` (psycopg plain str vs Literal). 6 mocked tests PASS. mypy strict + ruff clean.
+- **C.6 ✅ Telemetry** (PR #21) — `CostTracker.on_llm_end`: token usage → 7-model pricing dict → log + `UPDATE agent_executions.llm_cost`. `LangSmithTraceHandler.on_llm_start`: capture `run_id` → `UPDATE agent_executions.trace_id`. Both handlers swallow DB exceptions — telemetry never breaks LLM call chain. E501 fix: log string shortened. 7 mocked tests PASS incl. pricing accuracy (gpt-4o-mini: $0.0045 for 10k+5k tokens).
+- **C.7 ✅ Integration tests + coverage** (PR #22) — 5 smoke tests: end-to-end Agent.run() (FakeLLM+FakeMemory+FakeSkills), callback wiring (CostTracker+LangSmithTraceHandler+AsyncMock db), Protocol isinstance @runtime_checkable (all 3 fakes), Supabase backend isinstance checks, ClassVar validation at class definition time. `pytest-cov>=7.1` dev dep added. `[tool.coverage.run]` omit `main.py` (lru_cache+pydantic_settings coverage conflict). `fail_under=80`. Final result: 44 tests, 95.9% coverage.
+- **Faz 3 C ✅ COMPLETE** — C.1-C.7 all merged (PRs #14-#22). 7 source modules + 7 test files. 44 unit tests, 95.9% coverage. mypy strict (13 src files) + ruff clean. Memory entry: `project_faz3c_complete.md`.
+- **Sıradaki:** Faz 4 D — Crawl & Ingestion Pipeline (D.1 Crawl4AI spider → D.2 schema.org extractor → D.3 chunker → D.4 Modal BGE-M3 → D.5 pgvector → D.6 Celery → D.7 Storage)
