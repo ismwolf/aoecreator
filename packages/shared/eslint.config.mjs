@@ -1,6 +1,6 @@
-import tseslint from "typescript-eslint";
+import tseslint from 'typescript-eslint';
 
 export default [
-  { ignores: ["dist/**", "python/**", "node_modules/**"] },
+  { ignores: ['dist/**', 'python/**', 'node_modules/**'] },
   ...tseslint.configs.recommended,
 ];

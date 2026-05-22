@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 /**
  * Workspace — a per-customer workspace owned by an organization (digital agency).

@@ -13,17 +13,17 @@
 
 ## Faz durumları
 
-| # | Faz | Durum | Süre tahmini | Notlar |
-|---|---|---|---|---|
-| 0 | langchain-master skill | ✅ Done | 1 gün | T1-T11 merged 2026-05-14 (PR #2). Skill aktif: `Skill(skill="langchain-master", ...)`. T11 runtime dry-runs ilk gerçek MCP çağrısında doğrulanacak. |
-| 1 | A — Foundation bootstrap | ⏸ Blocked by Faz 0 | 1 hafta | Spec henüz yazılmadı |
-| 2 | B — Data layer + multi-tenancy | ✅ Done | 1 hafta | 3/3 sub-cycles complete: B.1 ✅ + B.2 ✅ + B.3 ✅ (2026-05-19). 13 tables + pgvector + HNSW + 24 RLS policies. Faz 2 G (provision + invite) ayrı alt-proje. |
-| 3 | C — Agent Core SDK | 🔄 In progress | 2 hafta | C.1 ✅ (2026-05-19, PR #14) — protocols + types + Agent ABC iskeleti. C.2-C.7 sıralı. En kritik faz. |
-| 4 | D — Crawl & ingestion | ⏸ Blocked by Faz 3 | 1 hafta | Crawl4AI + Modal embed |
-| 5 | E — v1 GEO agent suite (5 teknik) | ⏸ Blocked by Faz 4 | 3 hafta | 5 Analyzer + 5 Generator + Orchestrator |
-| 6 | F + G — Dashboard + Auth (paralel) | ⏸ Blocked by Faz 5 | 2 hafta | Next.js + Supabase Auth + Org |
-| 7 | H — Observability + Ops | ⏸ Blocked by Faz 6 | 1 hafta | LangSmith + Sentry + OTel |
-| 8 | Closed beta | ⏸ Blocked by Faz 7 | 1 hafta | 3-5 ajansla E2E test |
+| #   | Faz                                | Durum              | Süre tahmini | Notlar                                                                                                                                                      |
+| --- | ---------------------------------- | ------------------ | ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0   | langchain-master skill             | ✅ Done            | 1 gün        | T1-T11 merged 2026-05-14 (PR #2). Skill aktif: `Skill(skill="langchain-master", ...)`. T11 runtime dry-runs ilk gerçek MCP çağrısında doğrulanacak.         |
+| 1   | A — Foundation bootstrap           | ⏸ Blocked by Faz 0 | 1 hafta      | Spec henüz yazılmadı                                                                                                                                        |
+| 2   | B — Data layer + multi-tenancy     | ✅ Done            | 1 hafta      | 3/3 sub-cycles complete: B.1 ✅ + B.2 ✅ + B.3 ✅ (2026-05-19). 13 tables + pgvector + HNSW + 24 RLS policies. Faz 2 G (provision + invite) ayrı alt-proje. |
+| 3   | C — Agent Core SDK                 | 🔄 In progress     | 2 hafta      | C.1 ✅ (2026-05-19, PR #14) — protocols + types + Agent ABC iskeleti. C.2-C.7 sıralı. En kritik faz.                                                        |
+| 4   | D — Crawl & ingestion              | ⏸ Blocked by Faz 3 | 1 hafta      | Crawl4AI + Modal embed                                                                                                                                      |
+| 5   | E — v1 GEO agent suite (5 teknik)  | ⏸ Blocked by Faz 4 | 3 hafta      | 5 Analyzer + 5 Generator + Orchestrator                                                                                                                     |
+| 6   | F + G — Dashboard + Auth (paralel) | ⏸ Blocked by Faz 5 | 2 hafta      | Next.js + Supabase Auth + Org                                                                                                                               |
+| 7   | H — Observability + Ops            | ⏸ Blocked by Faz 6 | 1 hafta      | LangSmith + Sentry + OTel                                                                                                                                   |
+| 8   | Closed beta                        | ⏸ Blocked by Faz 7 | 1 hafta      | 3-5 ajansla E2E test                                                                                                                                        |
 
 **Durum legend:** ⏳ Pending / 🔄 In-progress / ✅ Completed / ⏸ Blocked / ⚠️ Issue / ⏭ Skipped
 
@@ -62,6 +62,7 @@ geliştirici (insan + AI) için. Production agent DEĞİL.
 **Plan:** Henüz yazılmadı.
 
 Yapılacaklar (high-level master plan §4.A'dan):
+
 - [x] T1: `git init -b dev` + initial commit + push (✅ 2026-05-13)
 - [x] T2: `.gitignore` (Node + Python + IDE + project-specific) (✅ 2026-05-13)
 - [x] T2.1: 3 environment branches (`dev`, `test`, `main`) + push (✅ 2026-05-13)
@@ -94,13 +95,16 @@ Yapılacaklar (high-level master plan §4.A'dan):
 ## Faz 2 (B) — Data Layer + Multi-Tenancy (🔄 In progress: B.1 done)
 
 **Decomposition (user-locked 2026-05-17):** 3 sub-cycle PR
+
 - **B.1** ✅ tenancy + RLS foundation (4 tablo: organizations, org_members, workspaces, workspace_members)
 - **B.2** ⏳ domain entities (5 tablo: sites, pages, analysis_runs, agent_executions, scores)
 - **B.3** ⏳ agent SDK support (4 tablo: agent_memory, agent_skills, embeddings, audit_log) + pgvector enable
 
 ### B.1 — Tenancy + RLS foundation (✅ 2026-05-17)
+
 **Spec:** `docs/specs/2026-05-17-faz2b-b1-tenancy-spec.md`
 **Plan:** `docs/plans/2026-05-17-faz2b-b1-tenancy-plan.md`
+
 - [x] 4 tablo migration via MCP `apply_migration`: organizations, org_members, workspaces, workspace_members
 - [x] Soft-delete pattern (`deleted_at timestamptz` her tabloda)
 - [x] SECURITY DEFINER RLS helpers in `private` schema (NOT exposed via PostgREST): `user_workspace_ids()`, `current_org_id()`, `is_org_admin(uuid)`
@@ -112,9 +116,11 @@ Yapılacaklar (high-level master plan §4.A'dan):
 - [x] 2 migration registered: `20260517030213_b1_tenancy`, `20260517030515_b1_security_hardening`
 
 ### B.2 — Domain entities (✅ 2026-05-19)
+
 **Spec:** `docs/specs/2026-05-19-faz2b-b2-domain-spec.md`
 **Plan:** `docs/plans/2026-05-19-faz2b-b2-domain-plan.md`
 **PR:** [#12](https://github.com/ismwolf/aoecreator/pull/12) (merged → `48c0dec`)
+
 - [x] 5 tablo migration via MCP `apply_migration`: sites, pages, analysis_runs, agent_executions, scores
 - [x] `workspace_id` denormalize on every B.2 table (RLS perf — join-free predicate)
 - [x] Schema decisions locked: `technique_id smallint CHECK 1..12`, `status text + CHECK`, `kicked_by ON DELETE SET NULL`, `input/output jsonb`
@@ -127,9 +133,11 @@ Yapılacaklar (high-level master plan §4.A'dan):
 - [x] Local migration mirror: `supabase/migrations/20260519000000_b2_domain.sql` (266 lines)
 
 ### B.3 — Agent SDK support (✅ 2026-05-19) — closes Faz 2 B
+
 **Spec:** `docs/specs/2026-05-19-faz2b-b3-agent-sdk-spec.md`
 **Plan:** `docs/plans/2026-05-19-faz2b-b3-agent-sdk-plan.md`
 **PR:** [#13](https://github.com/ismwolf/aoecreator/pull/13) (merged → `8566de2`)
+
 - [x] `pgvector` extension 0.8.0 installed in `extensions` schema (was null pre-migration)
 - [x] 4 tablo via MCP `apply_migration`: agent_memory, agent_skills, embeddings, audit_log
 - [x] `agent_memory.scope` 3-value enum (`global`/`workspace`/`agent`) + invariant CHECK constraint smoke-tested with 3 cases (1 başarılı, 2 expected fail)
@@ -144,6 +152,7 @@ Yapılacaklar (high-level master plan §4.A'dan):
 - [x] Local migration mirror: `supabase/migrations/20260519010000_b3_agent_sdk.sql` (253 lines)
 
 ### Faz 2 B — COMPLETE ✅ (2026-05-19)
+
 - **13 tables** in `public` schema (B.1: 4 tenancy + B.2: 5 domain + B.3: 4 agent SDK)
 - **~39 RLS policies** total (B.1: 16, B.2: 15, B.3: 8 — all `TO authenticated` + `WITH CHECK` on writes)
 - `pgvector` 0.8.0 enabled + HNSW cosine index — hybrid retrieval foundation ready
@@ -152,6 +161,7 @@ Yapılacaklar (high-level master plan §4.A'dan):
 - MCP-first migration workflow proven (3/3 success, all atomic, all `get_advisors('security')` clean)
 
 ### Faz 2 G (separate alt-proje, after B.3)
+
 - [ ] `provision-org-on-signup` Edge Function
 - [ ] Invite flow (`invitations` table)
 - [ ] Pytest BOLA integration test (User A workspace ↛ User B token, real auth.users)
@@ -161,9 +171,11 @@ Yapılacaklar (high-level master plan §4.A'dan):
 ## Faz 3 (C) — Agent Core SDK (🔄 In progress: C.1 done)
 
 ### C.1 — SOLID Protocols + Types + Agent ABC iskeleti (✅ 2026-05-19)
+
 **Spec:** `docs/specs/2026-05-19-faz3c-c1-protocols-spec.md`
 **Plan:** `docs/plans/2026-05-19-faz3c-c1-protocols-plan.md`
 **PR:** [#14](https://github.com/ismwolf/aoecreator/pull/14) (merged → `f83fb54`)
+
 - [x] `langchain-master` skill consultation (MCP docs unavailable — answer from training + opinion)
 - [x] 8 lock-in kararlar (typing.Protocol vs ABC vs BaseModel split, module path `apps/api/src/aeogen/agents/core/`, AgentContext 3-field minimal, mypy+pytest conformance strategy, DB-only SkillProvider, LangChain >=0.3,<0.4 pin, langgraph schema → C.2, OPENROUTER_API_KEY → C.3)
 - [x] 5 `typing.Protocol` (LLMProvider, EmbeddingProvider, MemoryBackend, SkillProvider, AgentTool) with `@runtime_checkable`
@@ -175,9 +187,11 @@ Yapılacaklar (high-level master plan §4.A'dan):
 - [x] All gates: ruff check, ruff format, mypy strict (9 source files), pytest -v (8 passed = 6 new + 2 health), uv lock --check
 
 ### C.2 — LangGraph Checkpoint + `langgraph` schema (✅ 2026-05-20)
+
 **Spec:** `docs/specs/2026-05-20-faz3c-c2-langgraph-checkpoint-spec.md`
 **Plan:** `docs/plans/2026-05-20-faz3c-c2-langgraph-checkpoint-plan.md`
 **PR:** [#15](https://github.com/ismwolf/aoecreator/pull/15) (merged → `a554436`)
+
 - [x] 4 lock-in kararlar: schema-only migration, PostgresDsn validator, per-run from_conn_string lifecycle, type/contract test (no real DB)
 - [x] New migration via MCP `apply_migration(name="langgraph_schema")` → `create schema langgraph` + grants (usage to postgres+service_role, create to service_role only — no authenticated/anon)
 - [x] `apps/api/src/aeogen/agents/core/checkpoint.py` — `build_postgres_saver` async context manager wrapping `AsyncPostgresSaver.from_conn_string` with `.setup()` + DSN search_path rewrite (no schema kwarg in LangGraph 0.6.11)
@@ -191,7 +205,9 @@ Yapılacaklar (high-level master plan §4.A'dan):
 - [x] 3 schemas now on Cloud: `public`, `private`, `langgraph` (5 migrations total)
 
 ### C.3 — OpenRouter LLM Adapter (⏳ Blocked by C.2)
+
 Master plan §4.C.3:
+
 - [ ] `apps/api/src/aeogen/agents/providers/openrouter.py` — `OpenRouterLLM` class implementing `LLMProvider`
 - [ ] `langchain-openai>=0.3,<0.4` dep
 - [ ] `Settings` extension: `OPENROUTER_API_KEY: SecretStr`, `OPENROUTER_BASE_URL` (default `https://openrouter.ai/api/v1`)
@@ -200,22 +216,26 @@ Master plan §4.C.3:
 - [ ] Negative tests: API error → exception, model unavailable → fallback used
 
 ### C.4 — Memory Backend (⏳ Blocked by C.3)
+
 - [ ] `apps/api/src/aeogen/agents/providers/supabase_memory.py` — `SupabaseMemoryBackend` implementing `MemoryBackend` (B.3 `agent_memory` table)
 - [ ] Vector search via pgvector hybrid (embeddings → cosine + sparse jsonb)
 - [ ] TTL eviction respect (`expires_at`)
 - [ ] hit_count increment + promotion threshold
 
 ### C.5 — Skill Registry (⏳ Blocked by C.3)
+
 - [ ] `apps/api/src/aeogen/agents/providers/supabase_skills.py` — `SupabaseSkillProvider` (B.3 `agent_skills` table, version + source)
 - [ ] Per-agent skill_key cache (in-process LRU)
 
 ### C.6 — Telemetry (⏳ Blocked by C.5)
+
 - [ ] `CostTracker.on_llm_end` body (UPDATE agent_executions.llm_cost)
 - [ ] `LangSmithTraceHandler.on_llm_start` body (capture trace_id into agent_executions.trace_id)
 - [ ] LangSmith env: `LANGCHAIN_TRACING_V2=true`, `LANGCHAIN_PROJECT=aeogen-prod`
 - [ ] Sentry + OpenTelemetry FastAPI auto-instrument
 
 ### C.7 — Tests (⏳ Blocked by C.6)
+
 - [ ] pytest-asyncio integration tests
 - [ ] Testcontainers Postgres + Redis (for full agent run with real checkpoint + memory)
 - [ ] End-to-end fake LLM smoke test
@@ -226,6 +246,7 @@ Master plan §4.C.3:
 ## Faz 4 (D) — Crawl & Ingestion Pipeline (⏸ Blocked)
 
 **Spec/Plan:** Henüz yazılmadı.
+
 - [ ] D.1: Crawl4AI spider wrapper (sitemap + robots + rate limit)
 - [ ] D.2: Schema.org + meta extractor
 - [ ] D.3: Semantic chunker (~512 token)
@@ -239,6 +260,7 @@ Master plan §4.C.3:
 ## Faz 5 (E) — v1 GEO Agent Suite (⏸ Blocked)
 
 **Spec/Plan:** Her teknik için ayrı veya gruplanmış spec/plan.
+
 - [ ] E.5: Question-Intent Targeting (Analyzer + Generator + skills)
 - [ ] E.2: Structured Knowledge (Analyzer + Generator + skills)
 - [ ] E.11: AI-Readable Formatting (Analyzer + Generator + skills)
@@ -252,6 +274,7 @@ Master plan §4.C.3:
 ## Faz 6 (F + G) — Dashboard + Auth (⏸ Blocked, paralel)
 
 **F (dashboard):**
+
 - [ ] (marketing) landing
 - [ ] (auth) login / signup / accept-invite
 - [ ] (app) dashboard / workspaces / sites / runs / pages / agents / settings
@@ -261,6 +284,7 @@ Master plan §4.C.3:
 - [ ] Playwright E2E (10 golden rules)
 
 **G (auth):**
+
 - [ ] `provision-org-on-signup` Edge Function
 - [ ] Invite flow
 - [ ] Role enforcement (DB + API + UI 3 katman)
@@ -296,6 +320,7 @@ Master plan §4.C.3:
 ## Logbook (orkestratör tarafından append-only)
 
 ### 2026-05-13
+
 - Planning oturumu tamamlandı (8 AskUserQuestion turu)
 - Master plan onaylandı: `docs/plans/2026-05-13-master-plan.md`
 - `C:\Users\iso\.claude\projects\C--aeogenerator\memory\` altında 5 memory dosyası yazıldı
@@ -314,6 +339,7 @@ Master plan §4.C.3:
   (sonra Faz 1 A.T3 pnpm workspace skeleton)
 
 ### 2026-05-14
+
 - **Agent fleet kuruldu (Opus)** — `C:\aeogenerator\.claude\agents\`:
   - `aeogen-orchestrator.md` (model: opus) — dispatcher agent
   - `aeogen-code-writer.md` (model: opus) — default implementation agent
@@ -326,7 +352,7 @@ Master plan §4.C.3:
     `package.json` (`pnpm@10.18.0`, Node ≥20.11, fan-out scripts)
   - Review: `superpowers:code-reviewer` → PASS (P2 packageManager fix
     applied — `10.0.0` → `10.18.0` for Corepack reproducibility)
-- **NOT:** Custom aeogen-* agent'lar bu sessionda Agent tool listesine
+- **NOT:** Custom aeogen-\* agent'lar bu sessionda Agent tool listesine
   yüklenmedi (Claude Code agent'ları session başında okur). Bir sonraki
   session'da otomatik aktif olacak. Smoke test için review leg
   `superpowers:code-reviewer` ile çalıştırıldı.
@@ -359,6 +385,7 @@ Master plan §4.C.3:
 - **Sıradaki:** A.T5 — `apps/api/` FastAPI 3.12 scaffold (plan henüz yazılmadı)
 
 ### 2026-05-15
+
 - **A.T5 plan** — Plan subagent dispatch:
   - User confirmed **uv** (Astral) as Python package manager (vs poetry/hatch+pip-tools)
   - 7-task plan: `docs/plans/2026-05-15-A.T5-fastapi-scaffold-plan.md` (566 lines)
@@ -375,6 +402,7 @@ Master plan §4.C.3:
 - **Sıradaki:** A.T6 — `packages/shared/` Pydantic + Zod parity schemas (plan TBD)
 
 ### 2026-05-16
+
 - **A.T6 plan** — Plan subagent dispatch:
   - User confirmed **Zod-first + Pydantic codegen** strategy (vs Pydantic-first / manual / TypeBox)
   - 9-task plan: `docs/plans/2026-05-15-A.T6-shared-zod-pydantic-parity-plan.md` (650 lines)
@@ -428,7 +456,8 @@ Master plan §4.C.3:
 - **Sıradaki:** A.T9 — env validation expansion (DATABASE_URL, REDIS_URL, OPENROUTER_API_KEY, gen-types CI)
 
 ### 2026-05-17
-- **Supabase MCP authenticated** (OAuth flow via browser → callback). Tools loaded: 20 mcp__supabase__* including apply_migration, list_tables, generate_typescript_types, get_advisors.
+
+- **Supabase MCP authenticated** (OAuth flow via browser → callback). Tools loaded: 20 mcp**supabase**\* including apply_migration, list_tables, generate_typescript_types, get_advisors.
 - **A.T8 follow-up PR #10 merged:** `database.types.ts` stub replaced with MCP-generated canonical (includes `__InternalSupabase`, `Constants`, etc.)
 - **Faz 2 B decomposition decision** (user-locked): 3 sub-cycle PR — B.1 tenancy, B.2 domain, B.3 agent SDK.
 - **B.1 brainstorm decisions** (user-locked): soft-delete (deleted_at column every table), MCP-first migration workflow (apply_migration + local file mirror per global rule), helpers in `private` schema for PostgREST hiding.
@@ -441,6 +470,7 @@ Master plan §4.C.3:
 - **Sıradaki:** B.2 — domain entities (5 tables: sites, pages, analysis_runs, agent_executions, scores)
 
 ### 2026-05-19
+
 - **B.2 brainstorm (4 user-locked kararlar):** technique_id smallint+CHECK(1..12) (no techniques table v1), status text+CHECK (B.1 role pattern, ALTER-friendly), kicked_by ON DELETE SET NULL (historical run preserved), agent_executions input/output as jsonb (master plan §4.B uyumlu).
 - **B.2 spec + plan written:** `docs/specs/2026-05-19-faz2b-b2-domain-spec.md`, `docs/plans/2026-05-19-faz2b-b2-domain-plan.md`.
 - **B.2 dispatch (aeogen-code-writer):**
@@ -484,6 +514,7 @@ Master plan §4.C.3:
 - **Sıradaki:** C.2 — LangGraph StateGraph + AsyncPostgresSaver checkpoint + `langgraph` schema migration (Supabase'de yeni schema)
 
 ### 2026-05-20
+
 - **C.2 brainstorm (4 user-locked kararlar):** schema-only migration (PostgresSaver auto-creates tables), `PostgresDsn` validator type, per-run `from_conn_string` lifecycle, type/factory test (no real DB).
 - **A.T9 decision:** items distributed JIT to phases that need them (DATABASE_URL → C.2 just now, OPENROUTER_API_KEY → C.3, REDIS_URL → Celery faz, gen-types CI → A.T12). A.T9 closed as "distributed" rather than single PR.
 - **C.2 spec + plan written:** `docs/specs/2026-05-20-faz3c-c2-langgraph-checkpoint-spec.md`, `docs/plans/2026-05-20-faz3c-c2-langgraph-checkpoint-plan.md`.
