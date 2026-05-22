@@ -22,7 +22,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "pnpm run build:ts && pnpm run build:json-schema && pnpm run codegen:python",
+    "build": "pnpm run build:ts && pnpm run build:json-schema",
     "build:ts": "tsc -p tsconfig.build.json",
     "build:json-schema": "tsx src/scripts/emit-json-schema.ts",
     "codegen:python": "tsx src/scripts/codegen-pydantic.ts",
