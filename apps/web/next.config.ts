@@ -1,7 +1,7 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
 
 // Import env at the top so validation runs at build time (per @t3-oss/env-nextjs).
-import "./src/lib/env";
+import './src/lib/env';
 
 /**
  * Baseline security response headers.
@@ -13,18 +13,18 @@ import "./src/lib/env";
  */
 const securityHeaders = [
   {
-    key: "Strict-Transport-Security",
-    value: "max-age=63072000; includeSubDomains; preload",
+    key: 'Strict-Transport-Security',
+    value: 'max-age=63072000; includeSubDomains; preload',
   },
-  { key: "X-Content-Type-Options", value: "nosniff" },
-  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-  { key: "X-Frame-Options", value: "DENY" },
+  { key: 'X-Content-Type-Options', value: 'nosniff' },
+  { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+  { key: 'X-Frame-Options', value: 'DENY' },
   {
-    key: "Permissions-Policy",
-    value: "camera=(), microphone=(), geolocation=()",
+    key: 'Permissions-Policy',
+    value: 'camera=(), microphone=(), geolocation=()',
   },
   {
-    key: "Content-Security-Policy",
+    key: 'Content-Security-Policy',
     value: [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
@@ -35,7 +35,7 @@ const securityHeaders = [
       "frame-ancestors 'none'",
       "base-uri 'self'",
       "form-action 'self'",
-    ].join("; "),
+    ].join('; '),
   },
 ];
 
@@ -45,7 +45,7 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        source: "/(.*)",
+        source: '/(.*)',
         headers: securityHeaders,
       },
     ];

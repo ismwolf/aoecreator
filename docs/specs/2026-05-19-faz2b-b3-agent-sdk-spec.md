@@ -140,6 +140,7 @@ create table public.audit_log (
 ### 2. RLS policies
 
 **agent_memory** (mixed scope):
+
 ```sql
 alter table public.agent_memory enable row level security;
 
@@ -176,6 +177,7 @@ create policy "agent_memory_update_workspace" on public.agent_memory
 ```
 
 **agent_skills** (global, read-open):
+
 ```sql
 alter table public.agent_skills enable row level security;
 
@@ -186,6 +188,7 @@ create policy "agent_skills_select_all" on public.agent_skills
 ```
 
 **embeddings** (workspace-scoped, B.2 pattern):
+
 ```sql
 alter table public.embeddings enable row level security;
 
@@ -204,6 +207,7 @@ create policy "embeddings_update" on public.embeddings
 ```
 
 **audit_log** (append-only, org-admin SELECT):
+
 ```sql
 alter table public.audit_log enable row level security;
 

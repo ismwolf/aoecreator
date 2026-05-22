@@ -143,24 +143,28 @@ grant execute on function public.is_org_admin(uuid) to authenticated;
 `alter table … enable row level security;` her tabloda + deny-all default + explicit policies:
 
 **organizations:**
+
 - SELECT: `id = current_org_id() and deleted_at is null`
 - UPDATE: `id = current_org_id() and deleted_at is null and is_org_admin(id)` (WITH CHECK aynı)
 - INSERT: `with check (is_org_admin(id))` — sadece owner/admin yeni org row tutamaz aslında; org creation Faz 2 G Edge Function (service_role) ile, INSERT policy `with check (false)` deny + Edge Function bypass eder service role ile. **Pratik:** authenticated user `insert into organizations` yapamamalı.
 - DELETE (soft): app-level `update set deleted_at = now()`, separate DELETE policy yok (UPDATE policy yeterli)
 
 **org_members:**
+
 - SELECT: `org_id = current_org_id() and deleted_at is null`
 - INSERT: `with check (is_org_admin(org_id))` — owner/admin yeni member ekleyebilir
 - UPDATE: same predicate + WITH CHECK
 - DELETE: same (kendisini owner çıkartamaz — invariant guard plan'da)
 
 **workspaces:**
+
 - SELECT: `org_id = current_org_id() and deleted_at is null and (id in (select public.user_workspace_ids()) or is_org_admin(org_id))`
 - INSERT: `with check (is_org_admin(org_id))` — sadece owner/admin yeni workspace yaratabilir
 - UPDATE: SELECT predicate + admin guard + WITH CHECK
 - DELETE: app-level soft
 
 **workspace_members:**
+
 - SELECT: `workspace_id in (select public.user_workspace_ids()) and deleted_at is null`
 - INSERT/UPDATE/DELETE: `is_org_admin((select org_id from workspaces where id = workspace_id))` — org admin invite/remove eder
 

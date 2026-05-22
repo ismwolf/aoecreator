@@ -22,6 +22,7 @@ Successors: B.2 (5 domain tables FK on workspaces), B.3 (4 agent SDK tables), Fa
 **File created:** `supabase/migrations/20260517000000_b1_tenancy.sql`
 
 Contents = the SQL body that will also be passed to `mcp__supabase__apply_migration` in T2. Order:
+
 1. `create extension if not exists moddatetime with schema extensions`
 2. `create table public.organizations …` (cols + constraints, no triggers yet)
 3. `create table public.org_members …` + `unique index org_members_org_user_active_uq … where deleted_at is null`
@@ -40,6 +41,7 @@ Contents = the SQL body that will also be passed to `mcp__supabase__apply_migrat
 ### T2 — Apply migration via MCP `apply_migration` (~2 min)
 
 **Tool call:**
+
 ```
 mcp__supabase__apply_migration(
   name="b1_tenancy",
@@ -48,6 +50,7 @@ mcp__supabase__apply_migration(
 ```
 
 If MCP returns error → STOP, surface to orchestrator. Common failures:
+
 - Syntax error in policy → fix SQL, re-apply
 - Permission denied on `auth.users` references → unlikely (Supabase grants this by default)
 - Extension already exists in different schema → `create extension if not exists` handles idempotency
@@ -59,12 +62,14 @@ If MCP returns error → STOP, surface to orchestrator. Common failures:
 ### T3 — Verify schema + RLS state (~3 min)
 
 **Tool calls:**
+
 ```
 mcp__supabase__list_tables(schemas=["public"], verbose=true)
 mcp__supabase__get_advisors(type="security")
 ```
 
 **Expected:**
+
 - `list_tables` returns 4 tables: `organizations`, `org_members`, `workspaces`, `workspace_members`
 - Each table shows `rls_enabled: true`
 - Each table has columns matching spec (id uuid pk, role check, deleted_at timestamptz, etc.)
@@ -78,6 +83,7 @@ If advisors show ANY `level: "ERROR"` or `level: "WARN"` → STOP, fix.
 ### T4 — Regenerate `database.types.ts` via MCP (~2 min)
 
 **Tool call:**
+
 ```
 mcp__supabase__generate_typescript_types()
 ```
@@ -103,6 +109,7 @@ All must pass. Build proves env.ts + database.types.ts integrate cleanly.
 ### T6 — Commit + push + PR + merge (~5 min)
 
 Stage:
+
 - `supabase/migrations/20260517000000_b1_tenancy.sql` (new)
 - `apps/web/src/lib/database.types.ts` (modified — now has real tables)
 - `docs/specs/2026-05-17-faz2b-b1-tenancy-spec.md` (new)
@@ -147,6 +154,7 @@ git status --porcelain → only expected files staged
 
 - Branch: `feature/B-data-layer-multitenancy` (already on it)
 - Commit:
+
   ```
   feat(db): B.1 tenancy + RLS foundation (Faz 2 B.1)
 
@@ -168,4 +176,5 @@ git status --porcelain → only expected files staged
   Spec: docs/specs/2026-05-17-faz2b-b1-tenancy-spec.md
   Plan: docs/plans/2026-05-17-faz2b-b1-tenancy-plan.md
   ```
+
 - PR target: `dev`

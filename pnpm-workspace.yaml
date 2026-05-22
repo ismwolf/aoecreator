@@ -1,6 +1,6 @@
 packages:
-  - "apps/web"
-  - "packages/shared"
+  - 'apps/web'
+  - 'packages/shared'
 
 onlyBuiltDependencies:
   - supabase

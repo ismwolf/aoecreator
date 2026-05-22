@@ -66,6 +66,7 @@ grant create on schema langgraph to service_role;  -- so .setup() can CREATE TAB
 ```
 
 Notes:
+
 - No `enable row level security` — `langgraph.*` tables are server-side only
 - No RLS policies — only service_role connects via DATABASE_URL
 - `service_role`'s `CREATE` grant lets `AsyncPostgresSaver.setup()` provision its 3 tables on first run

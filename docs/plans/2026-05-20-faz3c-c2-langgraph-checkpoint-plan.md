@@ -20,6 +20,7 @@ Successors: C.3 (OpenRouter LLM), C.4 (memory backend), C.5 (skill registry), C.
 ### T1 — Verify AsyncPostgresSaver API (~3 min)
 
 Run via `uv run python -c "..."`:
+
 ```python
 import inspect
 from langgraph.checkpoint.postgres.aio import AsyncPostgresSaver
@@ -28,6 +29,7 @@ print(AsyncPostgresSaver.from_conn_string.__doc__[:500] if AsyncPostgresSaver.fr
 ```
 
 Two outcomes:
+
 - **A.** Signature accepts a `schema` / `schema_name` kwarg → use it.
 - **B.** No schema kwarg → inject `options=-csearch_path%3Dlanggraph` into the connection string.
 
@@ -40,6 +42,7 @@ If `AsyncPostgresSaver` doesn't even import → STOP, report (langgraph dep brok
 ### T2 — Write RED test first (~5 min)
 
 Create `apps/api/tests/test_checkpoint_factory.py` per spec §4:
+
 - `test_build_postgres_saver_is_async_context_manager` — calls factory, checks `isinstance(cm, AbstractAsyncContextManager)`
 - `test_build_postgres_saver_signature` — inspects signature, asserts `db_url: str` param
 
@@ -52,6 +55,7 @@ Run `uv run pytest tests/test_checkpoint_factory.py -v` → expect `ModuleNotFou
 Write `supabase/migrations/20260520000000_langgraph_schema.sql` per spec §1.
 
 Apply:
+
 ```
 mcp__supabase__apply_migration(
   name="langgraph_schema",
@@ -60,18 +64,22 @@ mcp__supabase__apply_migration(
 ```
 
 If error:
+
 - Schema name conflict (already exists) → already created (rare); proceed with verify
 - Permission denied → STOP, report (service_role grant unexpected fail)
 
 Verify:
+
 ```
 mcp__supabase__execute_sql("select schema_name from information_schema.schemata where schema_name='langgraph';")
 ```
+
 Expect 1 row. If 0 rows → STOP.
 
 ```
 mcp__supabase__get_advisors(type="security")
 ```
+
 Expect `{"lints": []}` (or document any `langgraph` schema warning as accepted exception).
 
 ---
@@ -79,11 +87,13 @@ Expect `{"lints": []}` (or document any `langgraph` schema warning as accepted e
 ### T4 — Extend Settings (~5 min)
 
 Edit `apps/api/src/aeogen/settings.py`:
+
 - Add import: `from pydantic import PostgresDsn, AliasChoices` (if not present)
 - Add field: `database_url: PostgresDsn = Field(..., validation_alias=AliasChoices("DATABASE_URL"), description="Direct Postgres connection — NOT Supabase API URL")`
 - Optional: `repr=False` on Field to prevent leak in logs
 
 Update `apps/api/.env.example`:
+
 ```bash
 # === Postgres direct connection (NOT Supabase API URL) ===
 # Used by AsyncPostgresSaver. Supabase: Project Settings > Database >
@@ -93,6 +103,7 @@ DATABASE_URL=postgresql://postgres.<project-ref>:<password>@aws-0-<region>.poole
 ```
 
 Update `apps/api/tests/conftest.py` to inject a fake DATABASE_URL for tests (else Settings instantiation fails):
+
 ```python
 # Top of conftest, before any aeogen imports
 os.environ.setdefault("DATABASE_URL", "postgresql://test:test@localhost:5432/test")
@@ -107,10 +118,12 @@ Run `uv run mypy src` — should still be Success.
 Create `apps/api/src/aeogen/agents/core/checkpoint.py` per spec §3.
 
 **Schema selection logic (decision branch from T1):**
+
 - If T1 found schema kwarg → use it in `from_conn_string(db_url, schema="langgraph")` or equivalent
 - Else → rewrite db_url to append `?options=-csearch_path%3Dlanggraph` (preserve existing query params with proper URL parse)
 
 Example (branch B fallback):
+
 ```python
 from urllib.parse import urlsplit, urlunsplit, parse_qsl, urlencode
 
@@ -138,6 +151,7 @@ Run `uv run mypy src/aeogen/agents/core/checkpoint.py` — Success expected.
 ### T6 — Update re-exports (~2 min)
 
 Edit `apps/api/src/aeogen/agents/core/__init__.py`:
+
 - Add `from aeogen.agents.core.checkpoint import build_postgres_saver`
 - Append `"build_postgres_saver"` to `__all__` (sorted, 15 symbols total)
 
@@ -150,11 +164,13 @@ Run pytest again — expect 2 new tests PASS (GREEN). Quote the pass output.
 After migration, run `mcp__supabase__generate_typescript_types()`. The output adds `langgraph` schema to the `Database` type (even though we won't read it from frontend). Write to `apps/web/src/lib/database.types.ts`.
 
 Verify:
+
 ```powershell
 pnpm --filter @aeogen/web typecheck
 pnpm --filter @aeogen/web lint
 pnpm --filter @aeogen/web build
 ```
+
 All exit 0.
 
 ---
@@ -173,6 +189,7 @@ uv lock --check
 All exit 0. Pytest: 9+ passed (6 C.1 + 2 health + 2 new = 10).
 
 Stage:
+
 - `supabase/migrations/20260520000000_langgraph_schema.sql` (new)
 - `apps/api/src/aeogen/settings.py` (modified)
 - `apps/api/src/aeogen/agents/core/__init__.py` (modified, +1 symbol)
@@ -187,6 +204,7 @@ Stage:
 Do NOT stage `docs/PROGRESS.md` — orchestrator handles.
 
 Commit (HEREDOC):
+
 ```
 feat(api/agents,db): C.2 LangGraph checkpoint + `langgraph` schema (Faz 3 C.2)
 

@@ -30,22 +30,23 @@ oranını ölçülebilir şekilde artırmak.
 
 **12 GEO/AEO tekniği** (Gereklilikler 1-2 resimlerinden):
 
-| # | Teknik | v1 | Not |
-|---|---|---|---|
-| 1 | Semantic Authority | v2 | Topic-cluster gap analysis |
-| 2 | Structured Knowledge | **v1** | 40-word rule, table/list |
-| 3 | Entity-Based SEO | **v1** | spaCy + BGE-M3 entity gap |
-| 4 | Citation Optimization | **v1** | Academic + reliable source insertion |
-| 5 | Question-Intent Targeting | **v1** | FAQ schema, prompt-matched Q |
-| 6 | Data-Rich Content | v2 | Chart, benchmark, stats |
-| 7 | Knowledge Graph Alignment | v2 | Wikidata + LLM internal graph |
-| 8 | Multi-Platform Presence | v2 | YouTube/Medium/GitHub dist. |
-| 9 | Author Authority (E-E-A-T) | v2 | Author profile, LinkedIn |
-| 10 | Open Data / API Exposure | v2 | RSS, JSON-LD, GitHub repo |
-| 11 | AI-Readable Formatting | **v1** | H1/H2/H3 disiplini |
-| 12 | Contextual Brand Embedding | v2 | Brand voice tuning |
+| #   | Teknik                     | v1     | Not                                  |
+| --- | -------------------------- | ------ | ------------------------------------ |
+| 1   | Semantic Authority         | v2     | Topic-cluster gap analysis           |
+| 2   | Structured Knowledge       | **v1** | 40-word rule, table/list             |
+| 3   | Entity-Based SEO           | **v1** | spaCy + BGE-M3 entity gap            |
+| 4   | Citation Optimization      | **v1** | Academic + reliable source insertion |
+| 5   | Question-Intent Targeting  | **v1** | FAQ schema, prompt-matched Q         |
+| 6   | Data-Rich Content          | v2     | Chart, benchmark, stats              |
+| 7   | Knowledge Graph Alignment  | v2     | Wikidata + LLM internal graph        |
+| 8   | Multi-Platform Presence    | v2     | YouTube/Medium/GitHub dist.          |
+| 9   | Author Authority (E-E-A-T) | v2     | Author profile, LinkedIn             |
+| 10  | Open Data / API Exposure   | v2     | RSS, JSON-LD, GitHub repo            |
+| 11  | AI-Readable Formatting     | **v1** | H1/H2/H3 disiplini                   |
+| 12  | Contextual Brand Embedding | v2     | Brand voice tuning                   |
 
 **v1 hedef ROI (2026 araştırma bulguları):**
+
 - FAQ schema + prompt-matched Q ⇒ AI extraction **3.1x**
 - 40-word concise answer block ⇒ AI extraction **2.7x**
 - Citation insertion ⇒ visibility **+30%**
@@ -57,24 +58,24 @@ oranını ölçülebilir şekilde artırmak.
 
 ## 2. Mimari kararlar özeti (lock-in)
 
-| Karar | Seçim | Q# |
-|---|---|---|
-| Planlama yaklaşımı | Top-down full mimari | Q1 |
-| Hedef kitle | Ajans / agency tool (org→workspace→site) | Q2 |
-| Web stack | Next.js 15 (App Router) + TS strict + Tailwind + shadcn/ui | Q3 |
-| Auth + DB + Storage | Supabase Cloud (auth + Postgres + pgvector + Storage + RLS) | Q3 |
-| Agent backend | Python 3.12 + FastAPI + LangChain + LangGraph + LangSmith | (mevcut spec) |
-| LLM gateway | OpenRouter (Claude, OpenAI, Gemini, Grok, Perplexity) | (gereksinim) |
-| Task queue + scheduler | Celery + Redis + Celery Beat (periyodik) | Q4 |
-| LangGraph persistence | Postgres checkpoint (Supabase Postgres) | Q4 |
-| Observability | LangSmith + Sentry + OpenTelemetry | (best practice) |
-| Crawler | Crawl4AI (async Playwright, schema.org parse) | Q5 |
-| Vector DB | pgvector (Supabase Postgres) | Q6 |
-| Embedding model | BGE-M3 self-host (Modal serverless GPU) | Q6 |
-| v1 MVP scope | 5 GEO teknik (2, 3, 4, 5, 11) | Q7 |
-| Hosting | Hibrit: Hostinger KVM2 (app) + Supabase Cloud + Modal | Q8 |
-| Branş dili | UI: TR (i18n: EN v1.5), kod/log/commit: EN | (default) |
-| Source control | git (bu proje henüz init değil — kullanıcı `git init` yapacak) | — |
+| Karar                  | Seçim                                                          | Q#              |
+| ---------------------- | -------------------------------------------------------------- | --------------- |
+| Planlama yaklaşımı     | Top-down full mimari                                           | Q1              |
+| Hedef kitle            | Ajans / agency tool (org→workspace→site)                       | Q2              |
+| Web stack              | Next.js 15 (App Router) + TS strict + Tailwind + shadcn/ui     | Q3              |
+| Auth + DB + Storage    | Supabase Cloud (auth + Postgres + pgvector + Storage + RLS)    | Q3              |
+| Agent backend          | Python 3.12 + FastAPI + LangChain + LangGraph + LangSmith      | (mevcut spec)   |
+| LLM gateway            | OpenRouter (Claude, OpenAI, Gemini, Grok, Perplexity)          | (gereksinim)    |
+| Task queue + scheduler | Celery + Redis + Celery Beat (periyodik)                       | Q4              |
+| LangGraph persistence  | Postgres checkpoint (Supabase Postgres)                        | Q4              |
+| Observability          | LangSmith + Sentry + OpenTelemetry                             | (best practice) |
+| Crawler                | Crawl4AI (async Playwright, schema.org parse)                  | Q5              |
+| Vector DB              | pgvector (Supabase Postgres)                                   | Q6              |
+| Embedding model        | BGE-M3 self-host (Modal serverless GPU)                        | Q6              |
+| v1 MVP scope           | 5 GEO teknik (2, 3, 4, 5, 11)                                  | Q7              |
+| Hosting                | Hibrit: Hostinger KVM2 (app) + Supabase Cloud + Modal          | Q8              |
+| Branş dili             | UI: TR (i18n: EN v1.5), kod/log/commit: EN                     | (default)       |
+| Source control         | git (bu proje henüz init değil — kullanıcı `git init` yapacak) | —               |
 
 ---
 
@@ -181,6 +182,7 @@ Her alt-proje kendi `spec → plan → implement → verify` döngüsüne
 girecek. Sıra **dependency-driven**.
 
 ### A. Foundation & Repo bootstrap (1 hafta)
+
 - `git init` + Conventional Commits + Husky
 - Monorepo veya iki-repo karar (öneri: pnpm workspace monorepo:
   `apps/web/` Next.js, `apps/api/` FastAPI, `packages/shared/` zod
@@ -202,6 +204,7 @@ girecek. Sıra **dependency-driven**.
   - `.github/workflows/ci.yml`
 
 ### B. Data layer & multi-tenancy (1 hafta)
+
 - Supabase migration'lar (CLI üzerinden):
   - `organizations` (ajans), `org_members` (rol: owner/admin/member)
   - `workspaces` (müvekkil), `workspace_members` (read-only viewer
@@ -221,9 +224,9 @@ girecek. Sıra **dependency-driven**.
 - **RLS politikaları:** her tabloda
   - `TO authenticated`
   - `using ((select auth.jwt() -> 'app_metadata' ->> 'org_id')::uuid =
-    organization_id)` veya `workspace_id IN
-    (select unnest(string_to_array(auth.jwt() ->
-    'app_metadata' ->> 'workspace_ids', ',')::uuid[]))`
+organization_id)` veya `workspace_id IN
+(select unnest(string_to_array(auth.jwt() ->
+'app_metadata' ->> 'workspace_ids', ',')::uuid[]))`
 - Index'ler: her RLS sütununa + sık sorgulanan FK'lara
 - `auth.jwt() -> 'app_metadata' ->> 'org_id'` claim'i kullanıcı
   organizasyona katıldığında `auth.users.app_metadata` üzerinden
@@ -235,6 +238,7 @@ girecek. Sıra **dependency-driven**.
   - `apps/api/src/aeogen/db/` (asyncpg + SQLAlchemy 2.0 async)
 
 ### C. Agent Core SDK (2 hafta — alt-projelerden en büyüğü)
+
 **Amaç:** Tüm GEO agent'larının üzerine inşa edileceği base SDK. SOLID
 prensiplerine bağlı, swap-able LLM provider, swap-able memory backend,
 skill registry, structured output, retry/timeout, telemetry.
@@ -276,6 +280,7 @@ class Agent(ABC):
 ```
 
 #### C.2 — LangGraph entegrasyonu
+
 - Her agent içeride **kendi mini LangGraph workflow'una** sahip
   olabilir (Researcher → Analyzer → Critic → Output node'ları).
 - Üst-seviye `AnalysisOrchestrator` da bir LangGraph workflow'udur
@@ -284,6 +289,7 @@ class Agent(ABC):
   Supabase Postgres'te (ayrı schema: `langgraph`).
 
 #### C.3 — OpenRouter LLM adaptörü
+
 - `OpenRouterLLM(LLMProvider)` — `openai` SDK uyumlu base_url
   override.
 - Per-agent model override (`agent.default_llm = "anthropic/claude-sonnet-4.5"`).
@@ -293,20 +299,22 @@ class Agent(ABC):
 
 **Default model matrix (öneri, değiştirilebilir):**
 
-| Agent kindi | Default model | Alternatif |
-|---|---|---|
-| Crawl summary / classification | `openai/gpt-4o-mini` | `google/gemini-2.0-flash` |
-| Entity extraction | `openai/gpt-4o-mini` | spaCy `tr_core_news_lg` |
-| Question-intent analyzer | `anthropic/claude-sonnet-4.5` | `openai/gpt-5` |
-| FAQ generator | `anthropic/claude-sonnet-4.5` | `openai/gpt-5` |
-| Citation research | `perplexity/sonar-large` | — |
-| Structured knowledge gen | `anthropic/claude-sonnet-4.5` | `openai/gpt-5` |
-| AI-readable formatter | `openai/gpt-4o-mini` | `google/gemini-2.0-flash` |
-| Heavy reasoning (Orchestrator critic) | `anthropic/claude-opus-4` | `openai/o3` |
-| Multimodal (chart parse) v2 | `google/gemini-2.5-pro` | — |
+| Agent kindi                           | Default model                 | Alternatif                |
+| ------------------------------------- | ----------------------------- | ------------------------- |
+| Crawl summary / classification        | `openai/gpt-4o-mini`          | `google/gemini-2.0-flash` |
+| Entity extraction                     | `openai/gpt-4o-mini`          | spaCy `tr_core_news_lg`   |
+| Question-intent analyzer              | `anthropic/claude-sonnet-4.5` | `openai/gpt-5`            |
+| FAQ generator                         | `anthropic/claude-sonnet-4.5` | `openai/gpt-5`            |
+| Citation research                     | `perplexity/sonar-large`      | —                         |
+| Structured knowledge gen              | `anthropic/claude-sonnet-4.5` | `openai/gpt-5`            |
+| AI-readable formatter                 | `openai/gpt-4o-mini`          | `google/gemini-2.0-flash` |
+| Heavy reasoning (Orchestrator critic) | `anthropic/claude-opus-4`     | `openai/o3`               |
+| Multimodal (chart parse) v2           | `google/gemini-2.5-pro`       | —                         |
 
 #### C.4 — Memory backend (langchain-master patternının genelleştirilmesi)
+
 İki katman:
+
 - **Cache memory** (`scope=cache`): TTL'li, MCP/LLM çağrı sonuçları,
   Supabase `agent_memory` tablosu. Promotion mekaniği opsiyonel
   (langchain-master skill'inden devralındı).
@@ -318,6 +326,7 @@ Backend swap'lanabilir: `PostgresMemoryBackend`, `RedisMemoryBackend`
 (test). Default: Postgres.
 
 #### C.5 — Skill registry
+
 - Her agent'ın `skills/` klasörü: `system_prompt.md`, `examples.md`,
   `playbook_*.md`, `policy.md`.
 - Skill provider önce DB (`agent_skills` tablosu — runtime override),
@@ -327,6 +336,7 @@ Backend swap'lanabilir: `PostgresMemoryBackend`, `RedisMemoryBackend`
   `docs/superpowers/specs/2026-05-13-langchain-master-skill-design.md`).
 
 #### C.6 — Telemetry
+
 - LangSmith trace decorator her agent.run'a.
 - OpenTelemetry span; FastAPI middleware.
 - Sentry exception capture.
@@ -334,12 +344,14 @@ Backend swap'lanabilir: `PostgresMemoryBackend`, `RedisMemoryBackend`
   token in/out, cost USD, duration ms, success/fail.
 
 #### C.7 — Tests
+
 - `pytest` + `pytest-asyncio`
 - Her agent için: happy path + LLM mock + 1 edge case + 1 fail case
 - LangGraph workflow için: state transition unit test
 - Testcontainers: Postgres + Redis için integration test
 
 **Kritik dosyalar (C alt-projesi):**
+
 - `apps/api/src/aeogen/agents/core/protocols.py`
 - `apps/api/src/aeogen/agents/core/base.py`
 - `apps/api/src/aeogen/agents/core/llm.py` (OpenRouter)
@@ -351,6 +363,7 @@ Backend swap'lanabilir: `PostgresMemoryBackend`, `RedisMemoryBackend`
 - `apps/api/tests/agents/...`
 
 ### D. Crawl & Ingestion pipeline (1 hafta)
+
 - `crawl_site(site_id)` Celery task → Crawl4AI ile sitemap.xml + robots
 - Top-N page öncelik (homepage, kategori, ürün, blog)
 - Per-page: HTML snapshot → Supabase Storage `crawls/<site_id>/<hash>.html`,
@@ -371,27 +384,31 @@ Backend swap'lanabilir: `PostgresMemoryBackend`, `RedisMemoryBackend`
     endpoint)
 
 ### E. v1 GEO Agent Suite — 5 teknik × Analyzer+Generator (3 hafta)
+
 Her teknik için aynı şablon:
+
 - `<Technique>Analyzer(Agent)` — sayfayı al, skoru üret, gap listesi
 - `<Technique>Generator(Agent)` — gap listesinden öneri/diff üret
 
 #### v1 ajanları:
 
-| # | Teknik | Analyzer çıktı | Generator çıktı |
-|---|---|---|---|
-| 5 | Question-Intent | Soru-cevap kapsamı skor + missing Q listesi (LLM ile prompt-matched) | FAQ schema JSON-LD + HTML FAQ block (40-word rule) |
-| 2 | Structured Knowledge | Table/list/snippable block skoru | Markdown table + bulleted list + 40-word summary block |
-| 11 | AI-Readable Formatting | H1/H2/H3 hiyerarşi skoru, paragraf uzunluğu, list-vs-prose oranı | Yeniden yapılandırılmış başlık ağacı + paragraph chunk |
-| 3 | Entity-Based SEO | Sayfada eksik entity skoru (BGE-M3 + spaCy NER + LLM cross-ref) | Önerilen entity insertion + internal-link önerisi |
-| 4 | Citation Optimization | Mevcut citation density skoru | Perplexity Sonar ile bulunan akademik + güvenilir kaynak insertion önerisi |
+| #   | Teknik                 | Analyzer çıktı                                                       | Generator çıktı                                                            |
+| --- | ---------------------- | -------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| 5   | Question-Intent        | Soru-cevap kapsamı skor + missing Q listesi (LLM ile prompt-matched) | FAQ schema JSON-LD + HTML FAQ block (40-word rule)                         |
+| 2   | Structured Knowledge   | Table/list/snippable block skoru                                     | Markdown table + bulleted list + 40-word summary block                     |
+| 11  | AI-Readable Formatting | H1/H2/H3 hiyerarşi skoru, paragraf uzunluğu, list-vs-prose oranı     | Yeniden yapılandırılmış başlık ağacı + paragraph chunk                     |
+| 3   | Entity-Based SEO       | Sayfada eksik entity skoru (BGE-M3 + spaCy NER + LLM cross-ref)      | Önerilen entity insertion + internal-link önerisi                          |
+| 4   | Citation Optimization  | Mevcut citation density skoru                                        | Perplexity Sonar ile bulunan akademik + güvenilir kaynak insertion önerisi |
 
 Bunlara ek:
+
 - `AnalysisOrchestrator` — LangGraph workflow, 5 Analyzer'ı paralel
   çalıştırır, sonuçları aggregate eder, score card üretir.
 - `RecommendationPrioritizer` (lightweight LLM) — Gap'leri impact ×
   effort matrisinde sıralar.
 
 **Kritik dosyalar:**
+
 - `apps/api/src/aeogen/agents/question_intent/analyzer.py`
 - `apps/api/src/aeogen/agents/question_intent/generator.py`
 - `apps/api/src/aeogen/agents/question_intent/skills/system_prompt.md`
@@ -399,6 +416,7 @@ Bunlara ek:
 - `apps/api/src/aeogen/agents/orchestrator/workflow.py`
 
 ### F. Management Panel (Next.js dashboard) (2 hafta)
+
 - App Router, RSC default, `"use client"` leaf
 - Routes:
   - `(marketing)/` — landing
@@ -423,6 +441,7 @@ Bunlara ek:
 - E2E (Playwright): 10-golden-rules
 
 ### G. Auth & Org provisioning + Roles (1 hafta — F'yle paralel)
+
 - Supabase Auth: email+password, magic link, OAuth (Google) opsiyonel
 - Edge Function: `provision-org-on-signup`
   - Yeni user → `organizations` insert → user'ı `org_members` owner
@@ -437,6 +456,7 @@ Bunlara ek:
   trial)
 
 ### H. Observability + Ops (sürekli, 1 hafta initial)
+
 - LangSmith: tüm agent run'ları trace
 - Sentry: web + api error tracking
 - OpenTelemetry: FastAPI auto-instrument, custom span per agent
@@ -487,26 +507,29 @@ sütununa index.
 ## 6. Çapraz kesen konseptler
 
 ### 6.1 Skills + Memory pattern (agent başına)
+
 - `langchain-master` skill'in `references/` + `memory/` + `_index.json`
   modeli genelleştirildi: her agent için DB tabanlı eşdeğeri.
 - Skills: `agent_skills` tablosu + filesystem (`skills/<agent>/`).
   Filesystem version-controlled (git), DB runtime override.
 - Memory: `agent_memory` tablosu, `scope ∈ {global, org, workspace,
-  cache, long_term}`.
+cache, long_term}`.
 - Long-term memory: pgvector retrieval. Konuşma özetleri, müşteri
   tercih kalıpları, geçmiş başarılı içerik şablonları.
 
 ### 6.2 Cron jadveli (Celery Beat)
-| Job | Sıklık | Görev |
-|---|---|---|
-| `recrawl_due_sites` | Saatte 1 | `last_crawled_at` > `recrawl_interval` olan siteler |
-| `refresh_scores_daily` | Günlük 03:00 UTC | Stale skor olan sayfaları yeniden analiz |
-| `evict_expired_memory` | Günlük 04:00 UTC | TTL geçmiş `agent_memory` siler |
-| `prune_old_executions` | Haftalık Pzr 05:00 | 90 günden eski `agent_executions` arşivler |
-| `weekly_digest_email` | Haftalık Pzt 09:00 | Workspace owner'lara skor değişim raporu |
-| `freshness_check` | Günlük 06:00 UTC | "2 yıldan eski" sayfa raporu (AEO/freshness sinyali) |
+
+| Job                    | Sıklık             | Görev                                                |
+| ---------------------- | ------------------ | ---------------------------------------------------- |
+| `recrawl_due_sites`    | Saatte 1           | `last_crawled_at` > `recrawl_interval` olan siteler  |
+| `refresh_scores_daily` | Günlük 03:00 UTC   | Stale skor olan sayfaları yeniden analiz             |
+| `evict_expired_memory` | Günlük 04:00 UTC   | TTL geçmiş `agent_memory` siler                      |
+| `prune_old_executions` | Haftalık Pzr 05:00 | 90 günden eski `agent_executions` arşivler           |
+| `weekly_digest_email`  | Haftalık Pzt 09:00 | Workspace owner'lara skor değişim raporu             |
+| `freshness_check`      | Günlük 06:00 UTC   | "2 yıldan eski" sayfa raporu (AEO/freshness sinyali) |
 
 ### 6.3 LLM cost guard
+
 - Her workspace için `monthly_llm_budget_usd` (default $X). %80'e
   varınca admin email, %100'de yeni analiz durdurulur (manual override).
 - Per-agent `max_tokens_per_run` hard cap.
@@ -514,17 +537,20 @@ sütununa index.
   → cache hit (24 saat TTL).
 
 ### 6.4 Multi-tenancy izolasyon testi
+
 - Integration test: User A workspace verisini User B'nin token'ıyla
   okunamaz. Hem DB seviyesinde (RLS) hem API seviyesinde test edilir.
 - BOLA defense: `ownership_required` decorator FastAPI'de her endpoint'te.
 
 ### 6.5 i18n
+
 - v1 UI dili: TR
 - v1.5: i18n soyutlama (`next-intl`) + EN
 - Content generation her zaman site'ın `default_language`'ına göre
   (LLM prompt'unda explicit).
 
 ### 6.6 langchain-master skill entegrasyonu
+
 - Bu skill, **geliştirici (Claude Code) için** bir advisor. Production
   agent değil.
 - Implementation öncesi/sırasında LangGraph/LangChain/LangSmith
@@ -539,20 +565,20 @@ sütununa index.
 
 ## 7. Roadmap (high-level zaman çizelgesi)
 
-| Faz | Süre | İçerik |
-|---|---|---|
-| Faz 0 | 1 gün | langchain-master skill'i implement et (zaten planlı) |
-| Faz 1 (A) | 1 hafta | Foundation, repo, Docker Compose, Supabase init |
-| Faz 2 (B) | 1 hafta | Data layer, migration'lar, RLS, types |
-| Faz 3 (C) | 2 hafta | Agent Core SDK (en kritik) |
-| Faz 4 (D) | 1 hafta | Crawl + ingestion pipeline + Modal embed |
-| Faz 5 (E) | 3 hafta | v1 5 teknik agent'ı + Orchestrator |
-| Faz 6 (F+G) | 2 hafta paralel | Next.js dashboard + Auth/Org |
-| Faz 7 (H) | 1 hafta | Observability + ops setup |
-| Faz 8 | 1 hafta | E2E test + closed beta (3-5 ajans) |
-| **Toplam** | **~12 hafta** | v1 production-ready |
-| v1.5 | +4 hafta | 3 yeni teknik (Semantic Auth, Data-Rich, KG Align) + Stripe + i18n |
-| v2 | +8 hafta | Kalan 4 teknik + white-label + Author Authority |
+| Faz         | Süre            | İçerik                                                             |
+| ----------- | --------------- | ------------------------------------------------------------------ |
+| Faz 0       | 1 gün           | langchain-master skill'i implement et (zaten planlı)               |
+| Faz 1 (A)   | 1 hafta         | Foundation, repo, Docker Compose, Supabase init                    |
+| Faz 2 (B)   | 1 hafta         | Data layer, migration'lar, RLS, types                              |
+| Faz 3 (C)   | 2 hafta         | Agent Core SDK (en kritik)                                         |
+| Faz 4 (D)   | 1 hafta         | Crawl + ingestion pipeline + Modal embed                           |
+| Faz 5 (E)   | 3 hafta         | v1 5 teknik agent'ı + Orchestrator                                 |
+| Faz 6 (F+G) | 2 hafta paralel | Next.js dashboard + Auth/Org                                       |
+| Faz 7 (H)   | 1 hafta         | Observability + ops setup                                          |
+| Faz 8       | 1 hafta         | E2E test + closed beta (3-5 ajans)                                 |
+| **Toplam**  | **~12 hafta**   | v1 production-ready                                                |
+| v1.5        | +4 hafta        | 3 yeni teknik (Semantic Auth, Data-Rich, KG Align) + Stripe + i18n |
+| v2          | +8 hafta        | Kalan 4 teknik + white-label + Author Authority                    |
 
 ---
 
@@ -580,6 +606,7 @@ D (crawl) ──→ E (5 agent suite) ──→ F (dashboard)
 ## 9. Verification (kabul kriterleri — v1)
 
 ### Fonksiyonel
+
 1. Yeni ajans hesabı açılabilir, ajansa 2 workspace eklenebilir.
 2. Bir workspace içinde 3 site eklenip "analyze now" tetiklenir.
 3. ~5 dk içinde 3 sitenin de homepage'i için 5 teknikten skor üretilir.
@@ -591,6 +618,7 @@ D (crawl) ──→ E (5 agent suite) ──→ F (dashboard)
 9. PDF rapor white-label brandle indirilebilir.
 
 ### Operasyonel
+
 10. KVM2'de v1 dashboard + 2 Celery worker + Redis + nginx hepsi aynı
     anda < 7GB RAM kullanır.
 11. Tek site analizi maliyeti < $0.20 (5 teknik × ortalama LLM call).
@@ -599,6 +627,7 @@ D (crawl) ──→ E (5 agent suite) ──→ F (dashboard)
 14. Sentry'de tüm hata 1 dk içinde görünür.
 
 ### Güvenlik
+
 15. RLS açık her tabloda; service-role key sadece sunucuda (`NEXT_PUBLIC_`
     prefix yok).
 16. JWT validation issuer/audience/lifetime; `ClockSkew=0`.

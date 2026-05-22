@@ -35,15 +35,16 @@ authoritative, çelişen öneri yapma.
 
 ## Üç temel kaynak (kanonik)
 
-| Kaynak | Path | Amaç |
-|---|---|---|
-| Master plan | `docs/plans/2026-05-13-master-plan.md` | Lock-in mimari kararlar, 8 alt-proje, roadmap |
-| Progress takipçi | `docs/PROGRESS.md` | Her task'ın durumu, son güncelleme, sıradaki adım |
-| Memory index | `C:\Users\iso\.claude\projects\C--aeogenerator\memory\MEMORY.md` | Kalıcı proje hafızası (her session otomatik yüklü) |
+| Kaynak           | Path                                                             | Amaç                                               |
+| ---------------- | ---------------------------------------------------------------- | -------------------------------------------------- |
+| Master plan      | `docs/plans/2026-05-13-master-plan.md`                           | Lock-in mimari kararlar, 8 alt-proje, roadmap      |
+| Progress takipçi | `docs/PROGRESS.md`                                               | Her task'ın durumu, son güncelleme, sıradaki adım  |
+| Memory index     | `C:\Users\iso\.claude\projects\C--aeogenerator\memory\MEMORY.md` | Kalıcı proje hafızası (her session otomatik yüklü) |
 
 ## Otonomi modu
 
 **Tam otonom** (kullanıcı tercihi):
+
 - Orkestratör milestone'lar arası ONAY beklemeden ilerler
 - Skill yoksa OTOMATİK yaratır (template + frontmatter)
 - Sub-agent dispatch (Explore/Plan/general-purpose/code-reviewer)
@@ -60,17 +61,17 @@ authoritative, çelişen öneri yapma.
 
 ## Tech stack lock-in (master plan §2)
 
-| Katman | Karar |
-|---|---|
-| Web | Next.js 15 + TS strict + Tailwind + shadcn/ui |
+| Katman              | Karar                                                       |
+| ------------------- | ----------------------------------------------------------- |
+| Web                 | Next.js 15 + TS strict + Tailwind + shadcn/ui               |
 | Auth + DB + Storage | Supabase Cloud (Postgres + pgvector + Auth + Storage + RLS) |
-| Backend | Python 3.12 + FastAPI + LangChain + LangGraph + LangSmith |
-| LLM | OpenRouter |
-| Queue + cron | Celery + Redis + Celery Beat |
-| Crawler | Crawl4AI |
-| Vector + embed | pgvector + BGE-M3 self-host (Modal) |
-| Hosting | Hostinger KVM2 + Supabase Cloud + Modal |
-| Branş dili | UI: TR, kod/log/commit: EN |
+| Backend             | Python 3.12 + FastAPI + LangChain + LangGraph + LangSmith   |
+| LLM                 | OpenRouter                                                  |
+| Queue + cron        | Celery + Redis + Celery Beat                                |
+| Crawler             | Crawl4AI                                                    |
+| Vector + embed      | pgvector + BGE-M3 self-host (Modal)                         |
+| Hosting             | Hostinger KVM2 + Supabase Cloud + Modal                     |
+| Branş dili          | UI: TR, kod/log/commit: EN                                  |
 
 ## Repo konvansiyonları (proje-özel)
 
@@ -81,19 +82,19 @@ authoritative, çelişen öneri yapma.
 - **NEVER** commit secrets — `gitleaks` pre-commit gate
 - **NEVER** auto-run EF/Alembic migration in prod startup
 
-## Git workflow (3 environment branch + feature/*)
+## Git workflow (3 environment branch + feature/\*)
 
 **Repo:** https://github.com/ismwolf/aoecreator
 **Default branch:** `dev`
 
 ### Branch yapısı
 
-| Branch | Ortam | Koruma | Push politikası |
-|---|---|---|---|
-| `dev` | Development (active) | Direct push İZİNLİ (auto-commit ile) | Her feature/<n> merge edilince |
-| `test` | Staging / QA | PR REQUIRED | Manuel: dev → test PR + onay |
-| `main` | Production | PR REQUIRED + 1 review | Manuel: test → main PR + onay |
-| `feature/<n>-<kebab>` | Per-task | Direct push İZİNLİ | Otonom |
+| Branch                | Ortam                | Koruma                               | Push politikası                |
+| --------------------- | -------------------- | ------------------------------------ | ------------------------------ |
+| `dev`                 | Development (active) | Direct push İZİNLİ (auto-commit ile) | Her feature/<n> merge edilince |
+| `test`                | Staging / QA         | PR REQUIRED                          | Manuel: dev → test PR + onay   |
+| `main`                | Production           | PR REQUIRED + 1 review               | Manuel: test → main PR + onay  |
+| `feature/<n>-<kebab>` | Per-task             | Direct push İZİNLİ                   | Otonom                         |
 
 ### Promotion akışı (otonom + manuel hibrit)
 
@@ -110,12 +111,14 @@ feature/<n>-<task>  ─── auto commit + push ────► origin/feature/
 ### Otonom commit + push politikası (bu sessionda netleştirildi)
 
 Tam otonom orkestratör şunları **OTOMATIK** yapar:
+
 - `feature/<n>` branch'inde her task complete → Conventional commit + push
 - Alt-proje complete → PR open: `feature/<n>` → `dev`
 - Faz complete → PROGRESS.md güncelle + commit + push to dev
 - Co-Authored-By footer her commit'te zorunlu
 
 Şunlar için **KULLANICI ONAYI** zorunlu (bypass etmez):
+
 - PR `dev` → `test` (staging deploy tetikler)
 - PR `test` → `main` (prod deploy tetikler)
 - `git push --force`, `git reset --hard`, `git branch -D`

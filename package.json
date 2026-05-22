@@ -8,6 +8,7 @@
     "pnpm": ">=10"
   },
   "scripts": {
+    "prepare": "husky",
     "lint": "pnpm -r --parallel lint",
     "typecheck": "pnpm -r --parallel typecheck",
     "test": "pnpm -r --parallel test",
@@ -15,6 +16,12 @@
     "dev": "pnpm -r --parallel dev"
   },
   "devDependencies": {
+    "@commitlint/cli": "^19.8.1",
+    "@commitlint/config-conventional": "^19.8.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.2",
+    "prettier": "^3.5.3",
+    "prettier-plugin-tailwindcss": "^0.7.4",
     "supabase": "^2.98.2"
   }
 }

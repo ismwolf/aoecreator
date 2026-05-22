@@ -1,12 +1,12 @@
-import { writeFile, mkdir } from "node:fs/promises";
-import { resolve, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
-import { z } from "zod";
-import { SiteSchema } from "../schemas/site.js";
-import { WorkspaceSchema } from "../schemas/workspace.js";
+import { writeFile, mkdir } from 'node:fs/promises';
+import { resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { z } from 'zod';
+import { SiteSchema } from '../schemas/site.js';
+import { WorkspaceSchema } from '../schemas/workspace.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const OUT_DIR = resolve(__dirname, "../../dist/schemas");
+const OUT_DIR = resolve(__dirname, '../../dist/schemas');
 
 interface SchemaExport {
   name: string;
@@ -15,8 +15,12 @@ interface SchemaExport {
 }
 
 const EXPORTS: SchemaExport[] = [
-  { name: "Site", filename: "site.schema.json", schema: SiteSchema },
-  { name: "Workspace", filename: "workspace.schema.json", schema: WorkspaceSchema },
+  { name: 'Site', filename: 'site.schema.json', schema: SiteSchema },
+  {
+    name: 'Workspace',
+    filename: 'workspace.schema.json',
+    schema: WorkspaceSchema,
+  },
 ];
 
 /**
@@ -30,19 +34,19 @@ const EXPORTS: SchemaExport[] = [
  * fields (e.g. Workspace.slug) — those are real, semantic constraints.
  */
 function stripRedundantPatterns(node: unknown): void {
-  if (node === null || typeof node !== "object") return;
+  if (node === null || typeof node !== 'object') return;
   if (Array.isArray(node)) {
     for (const item of node) stripRedundantPatterns(item);
     return;
   }
   const obj = node as Record<string, unknown>;
-  const format = obj["format"];
+  const format = obj['format'];
   if (
-    typeof format === "string" &&
-    (format === "uuid" || format === "date-time") &&
-    "pattern" in obj
+    typeof format === 'string' &&
+    (format === 'uuid' || format === 'date-time') &&
+    'pattern' in obj
   ) {
-    delete obj["pattern"];
+    delete obj['pattern'];
   }
   for (const value of Object.values(obj)) stripRedundantPatterns(value);
 }
@@ -64,31 +68,31 @@ function stripRedundantPatterns(node: unknown): void {
  * Patterns with more than two members or with refs are left untouched.
  */
 function collapseNullableAnyOf(node: unknown): void {
-  if (node === null || typeof node !== "object") return;
+  if (node === null || typeof node !== 'object') return;
   if (Array.isArray(node)) {
     for (const item of node) collapseNullableAnyOf(item);
     return;
   }
   const obj = node as Record<string, unknown>;
-  const anyOf = obj["anyOf"];
+  const anyOf = obj['anyOf'];
   if (Array.isArray(anyOf) && anyOf.length === 2) {
     const nullIdx = anyOf.findIndex(
       (m) =>
         m !== null &&
-        typeof m === "object" &&
+        typeof m === 'object' &&
         !Array.isArray(m) &&
-        (m as Record<string, unknown>)["type"] === "null" &&
-        Object.keys(m as Record<string, unknown>).length === 1,
+        (m as Record<string, unknown>)['type'] === 'null' &&
+        Object.keys(m as Record<string, unknown>).length === 1
     );
     const otherIdx = nullIdx === 0 ? 1 : nullIdx === 1 ? 0 : -1;
     if (nullIdx !== -1 && otherIdx !== -1) {
       const other = anyOf[otherIdx] as Record<string, unknown>;
-      const otherType = other["type"];
-      if (typeof otherType === "string") {
-        delete obj["anyOf"];
+      const otherType = other['type'];
+      if (typeof otherType === 'string') {
+        delete obj['anyOf'];
         for (const [k, v] of Object.entries(other)) {
-          if (k === "type") {
-            obj["type"] = [otherType, "null"];
+          if (k === 'type') {
+            obj['type'] = [otherType, 'null'];
           } else {
             obj[k] = v;
           }
@@ -103,19 +107,19 @@ async function main(): Promise<void> {
   await mkdir(OUT_DIR, { recursive: true });
   for (const exp of EXPORTS) {
     const json = z.toJSONSchema(exp.schema, {
-      target: "draft-2020-12",
-      reused: "inline",
+      target: 'draft-2020-12',
+      reused: 'inline',
     });
     stripRedundantPatterns(json);
     collapseNullableAnyOf(json);
     const enriched = {
-      $schema: "https://json-schema.org/draft/2020-12/schema",
+      $schema: 'https://json-schema.org/draft/2020-12/schema',
       $id: `https://aeogen.local/schemas/${exp.filename}`,
       title: exp.name,
       ...json,
     };
     const path = resolve(OUT_DIR, exp.filename);
-    await writeFile(path, JSON.stringify(enriched, null, 2) + "\n", "utf8");
+    await writeFile(path, JSON.stringify(enriched, null, 2) + '\n', 'utf8');
     console.log(`emit: ${exp.filename}`);
   }
 }

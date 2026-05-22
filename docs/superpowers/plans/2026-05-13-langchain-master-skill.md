@@ -20,6 +20,7 @@
 ## Task 1: Skill directory scaffold
 
 **Files:**
+
 - Create: `C:\aeogenerator\.claude\skills\langchain-master\memory\.gitkeep`
 - Create: `C:\aeogenerator\.claude\skills\langchain-master\references\.gitkeep`
 - Create: `C:\aeogenerator\.claude\skills\langchain-master\memory\_index.json`
@@ -27,6 +28,7 @@
 - [ ] **Step 1: Create the directory tree**
 
 Run (PowerShell):
+
 ```powershell
 New-Item -ItemType Directory -Path 'C:\aeogenerator\.claude\skills\langchain-master\memory' -Force
 New-Item -ItemType Directory -Path 'C:\aeogenerator\.claude\skills\langchain-master\references' -Force
@@ -37,6 +39,7 @@ Expected: both paths return `True` on `Test-Path`.
 - [ ] **Step 2: Create the empty cache index**
 
 Write file `C:\aeogenerator\.claude\skills\langchain-master\memory\_index.json` with:
+
 ```json
 {
   "version": 1,
@@ -54,11 +57,13 @@ These keep the directories tracked once the project becomes a git repo.
 - [ ] **Step 4: Verify the scaffold**
 
 Run (PowerShell):
+
 ```powershell
 Get-ChildItem 'C:\aeogenerator\.claude\skills\langchain-master' -Recurse | ForEach-Object { $_.FullName }
 ```
 
 Expected output (order may vary):
+
 ```
 C:\aeogenerator\.claude\skills\langchain-master\memory
 C:\aeogenerator\.claude\skills\langchain-master\references
@@ -79,6 +84,7 @@ git commit -m "feat(skills): scaffold langchain-master skill directory"
 ## Task 2: `SKILL.md` frontmatter and document skeleton
 
 **Files:**
+
 - Create: `C:\aeogenerator\.claude\skills\langchain-master\SKILL.md`
 
 - [ ] **Step 1: Write the frontmatter + table of contents**
@@ -121,6 +127,7 @@ answer in the persona described under **Persona**.
 - [ ] **Step 2: Verify the file is valid YAML frontmatter**
 
 Run (PowerShell):
+
 ```powershell
 Get-Content 'C:\aeogenerator\.claude\skills\langchain-master\SKILL.md' -TotalCount 12
 ```
@@ -139,6 +146,7 @@ git commit -m "feat(skills): add langchain-master frontmatter and TOC"
 ## Task 3: Persona section
 
 **Files:**
+
 - Modify: `C:\aeogenerator\.claude\skills\langchain-master\SKILL.md` (append)
 
 - [ ] **Step 1: Append the Persona section**
@@ -146,7 +154,6 @@ git commit -m "feat(skills): add langchain-master frontmatter and TOC"
 Append the following to `SKILL.md`:
 
 ```markdown
-
 ## Persona
 
 When answering, adopt this voice:
@@ -159,7 +166,7 @@ When answering, adopt this voice:
   defends it; mentions the rejected alternative in one line max.
   Never lists every option — that is what the docs are for.
 - **Project context.** The `aeogenerator` project is an AEO SaaS in
-  the *planning* phase. No vector store, model provider, or framework
+  the _planning_ phase. No vector store, model provider, or framework
   decisions are locked in yet. When asked "which X should we use?",
   recommend a default given AEO workloads (RAG-heavy, multi-step
   research, content generation, scoring) and name the 2-3 inputs
@@ -177,6 +184,7 @@ When answering, adopt this voice:
 - [ ] **Step 2: Verify the section was appended**
 
 Run (PowerShell):
+
 ```powershell
 Select-String -Path 'C:\aeogenerator\.claude\skills\langchain-master\SKILL.md' -Pattern '^## Persona$'
 ```
@@ -195,14 +203,14 @@ git commit -m "feat(skills): define langchain-master persona"
 ## Task 4: Workflow section (the core 6-step pipeline)
 
 **Files:**
+
 - Modify: `C:\aeogenerator\.claude\skills\langchain-master\SKILL.md` (append)
 
 - [ ] **Step 1: Append the Workflow section**
 
 Append the following to `SKILL.md`:
 
-````markdown
-
+```markdown
 ## Workflow
 
 Run these six steps **in order** for every invocation. Do not skip
@@ -217,6 +225,7 @@ Call the resulting slug `topic_key` for the rest of the workflow.
 
 Read `.claude/skills/langchain-master/references/<topic_key>.md`.
 If the file exists:
+
 - Use its body as your authoritative answer.
 - Skip steps 3 and 4 entirely.
 - Jump to step 6 (Return).
@@ -242,29 +251,30 @@ Read `.claude/skills/langchain-master/memory/_index.json`. Look up
 ### Step 4 — Query the MCP (cache miss path)
 
 a. **Breadth query.** Call
-   `mcp__docs-langchain__search_docs_by_lang_chain` with the user's
-   question (or a paraphrased version focusing on the technical core).
-   Inspect the returned doc paths.
+`mcp__docs-langchain__search_docs_by_lang_chain` with the user's
+question (or a paraphrased version focusing on the technical core).
+Inspect the returned doc paths.
 
 b. **Depth query.** For each of the top 1-3 most relevant paths, call
-   `mcp__docs-langchain__query_docs_filesystem_docs_by_lang_chain` to
-   read the full content.
+`mcp__docs-langchain__query_docs_filesystem_docs_by_lang_chain` to
+read the full content.
 
 c. **Synthesize.** Compose an opinionated answer in the persona voice.
-   Include at least one runnable code snippet if the topic warrants it.
-   End with a `Sources:` footer listing the MCP paths/URLs you pulled
-   from.
+Include at least one runnable code snippet if the topic warrants it.
+End with a `Sources:` footer listing the MCP paths/URLs you pulled
+from.
 
 d. **Write the cache entry.** Create or overwrite
-   `memory/<topic_key>.md` using the format in [Cache files](#cache-files).
-   - Set `cached_at` to the current UTC ISO-8601 timestamp.
-   - If `entries[topic_key]` already existed (stale refresh), keep its
-     `hit_count`. Otherwise initialize `hit_count` to `1`.
-   - Set `promoted: false` for new entries; preserve the prior
-     `promoted` value on stale refresh.
+`memory/<topic_key>.md` using the format in [Cache files](#cache-files).
+
+- Set `cached_at` to the current UTC ISO-8601 timestamp.
+- If `entries[topic_key]` already existed (stale refresh), keep its
+  `hit_count`. Otherwise initialize `hit_count` to `1`.
+- Set `promoted: false` for new entries; preserve the prior
+  `promoted` value on stale refresh.
 
 e. **Update `_index.json`.** Read, modify the `entries[topic_key]`
-   object, and write back. Preserve other entries verbatim.
+object, and write back. Preserve other entries verbatim.
 
 ### Step 5 — Promotion check
 
@@ -281,11 +291,13 @@ but **before** the `Sources:` footer:
 > dosyayı promote ederim, `hayır` dersen bir daha sormam.
 
 If the user replies `evet` (or English `yes`) in the **next turn**:
+
 - Copy `memory/<topic_key>.md` to `references/<topic_key>.md`.
 - Set `entries[topic_key].promoted = true`.
 - Write `_index.json` back.
 
 If the user replies `hayır` (or `no`):
+
 - Set `entries[topic_key].promoted = "declined"`.
 - Write `_index.json` back.
 - Never suggest promotion for this topic again.
@@ -297,11 +309,12 @@ Skip step 5 entirely if `promoted` is already `true` or `"declined"`.
 Return the synthesized answer (plus the promotion suggestion if step 5
 emitted one). No metacommentary about cache hits/misses — the user only
 wants the answer.
-````
+```
 
 - [ ] **Step 2: Verify the workflow section is intact**
 
 Run (PowerShell):
+
 ```powershell
 Select-String -Path 'C:\aeogenerator\.claude\skills\langchain-master\SKILL.md' -Pattern '^### Step [1-6] '
 ```
@@ -320,14 +333,14 @@ git commit -m "feat(skills): add 6-step workflow to langchain-master"
 ## Task 5: Topic-key normalization rules
 
 **Files:**
+
 - Modify: `C:\aeogenerator\.claude\skills\langchain-master\SKILL.md` (append)
 
 - [ ] **Step 1: Append the Topic-key normalization section**
 
 Append to `SKILL.md`:
 
-````markdown
-
+```markdown
 ## Topic-key normalization
 
 The `topic_key` is a deterministic, filesystem-safe slug derived from
@@ -355,21 +368,22 @@ the user's question. To compute it:
 
 ### Examples
 
-| User question | `topic_key` |
-|---|---|
+| User question                                              | `topic_key`                              |
+| ---------------------------------------------------------- | ---------------------------------------- |
 | "LangGraph'ta human-in-the-loop breakpoint nasıl kurulur?" | `breakpoint-human-in-the-loop-langgraph` |
-| "How do I stream tokens from an LCEL chain?" | `lcel-stream-tokens` |
-| "LangSmith evals for a RAG pipeline" | `evals-langsmith-pipeline-rag` |
-| "Async tool calling with structured output" | `async-output-structured-tool-calling` |
+| "How do I stream tokens from an LCEL chain?"               | `lcel-stream-tokens`                     |
+| "LangSmith evals for a RAG pipeline"                       | `evals-langsmith-pipeline-rag`           |
+| "Async tool calling with structured output"                | `async-output-structured-tool-calling`   |
 
 If you are uncertain whether two questions should share a key, prefer
 **separate keys** — a false cache miss is cheap; a false cache hit
 returns the wrong answer.
-````
+```
 
 - [ ] **Step 2: Verify the examples table is present**
 
 Run (PowerShell):
+
 ```powershell
 Select-String -Path 'C:\aeogenerator\.claude\skills\langchain-master\SKILL.md' -Pattern '^\| User question'
 ```
@@ -388,6 +402,7 @@ git commit -m "feat(skills): define topic-key normalization rules"
 ## Task 6: Cache file formats
 
 **Files:**
+
 - Modify: `C:\aeogenerator\.claude\skills\langchain-master\SKILL.md` (append)
 
 - [ ] **Step 1: Append the Cache files section**
@@ -395,7 +410,6 @@ git commit -m "feat(skills): define topic-key normalization rules"
 Append to `SKILL.md`:
 
 ````markdown
-
 ## Cache files
 
 ### `memory/_index.json`
@@ -444,6 +458,7 @@ runnable Python example. Ends with a Sources: footer.]
 ```
 
 Frontmatter rules:
+
 - `topic_key` matches the filename stem and the key in `_index.json`.
 - `cached_at` is the UTC ISO-8601 timestamp at write time.
 - `hit_count` mirrors `_index.json` (kept in sync for recovery — see
@@ -460,6 +475,7 @@ after promotion.
 - [ ] **Step 2: Verify the section was added**
 
 Run (PowerShell):
+
 ```powershell
 Select-String -Path 'C:\aeogenerator\.claude\skills\langchain-master\SKILL.md' -Pattern '^## Cache files$'
 ```
@@ -478,6 +494,7 @@ git commit -m "feat(skills): document cache file formats"
 ## Task 7: Cache management section (TTL, promotion mechanics)
 
 **Files:**
+
 - Modify: `C:\aeogenerator\.claude\skills\langchain-master\SKILL.md` (append)
 
 - [ ] **Step 1: Append the Cache management section**
@@ -485,7 +502,6 @@ git commit -m "feat(skills): document cache file formats"
 Append to `SKILL.md`:
 
 ```markdown
-
 ## Cache management
 
 ### TTL
@@ -524,6 +540,7 @@ manually to flip the field back to `false`.
 - [ ] **Step 2: Verify the section was added**
 
 Run (PowerShell):
+
 ```powershell
 Select-String -Path 'C:\aeogenerator\.claude\skills\langchain-master\SKILL.md' -Pattern '^## Cache management$'
 ```
@@ -542,6 +559,7 @@ git commit -m "feat(skills): define TTL, invalidation, promotion rules"
 ## Task 8: Error recovery section
 
 **Files:**
+
 - Modify: `C:\aeogenerator\.claude\skills\langchain-master\SKILL.md` (append)
 
 - [ ] **Step 1: Append the Error recovery section**
@@ -549,7 +567,6 @@ git commit -m "feat(skills): define TTL, invalidation, promotion rules"
 Append to `SKILL.md`:
 
 ````markdown
-
 ## Error recovery
 
 ### Corrupted `_index.json`
@@ -557,7 +574,7 @@ Append to `SKILL.md`:
 If reading `_index.json` raises a JSON parse error:
 
 1. Log a single warning line to the user: `⚠️ memory/_index.json was
-   corrupted — rebuilding from cache file frontmatter.`
+corrupted — rebuilding from cache file frontmatter.`
 2. Initialize a new empty index: `{"version": 1, "entries": {}}`.
 3. List every `memory/*.md` file. For each, parse its frontmatter and
    reconstruct an entry:
@@ -605,6 +622,7 @@ user disputes it), the skill should:
 - [ ] **Step 2: Verify the section was added**
 
 Run (PowerShell):
+
 ```powershell
 Select-String -Path 'C:\aeogenerator\.claude\skills\langchain-master\SKILL.md' -Pattern '^## Error recovery$'
 ```
@@ -623,19 +641,19 @@ git commit -m "feat(skills): add error recovery procedures"
 ## Task 9: Output format section
 
 **Files:**
+
 - Modify: `C:\aeogenerator\.claude\skills\langchain-master\SKILL.md` (append)
 
 - [ ] **Step 1: Append the Output format section**
 
 Append to `SKILL.md`:
 
-````markdown
-
+```markdown
 ## Output format
 
 Every answer the skill returns follows this template:
-
 ```
+
 **[Topic title, plain prose, 1 line]**
 
 [One-sentence opinionated takeaway — your recommended path.]
@@ -651,9 +669,12 @@ in one line if relevant.]
 [Optional: gotchas, version-specific notes, links to related topics.]
 
 ---
+
 **Sources:**
+
 - <MCP doc path or URL>
 - <MCP doc path or URL>
+
 ```
 
 If step 5 emitted a promotion suggestion, it goes **between** the
@@ -667,11 +688,14 @@ before the `---`).
 - If the question is ambiguous, ask **one** clarifying question
   instead of guessing.
 - Code blocks must be runnable as-is; no `...` placeholders.
+```
+
 ````
 
 - [ ] **Step 2: Verify the section was added**
 
 Run (PowerShell):
+
 ```powershell
 Select-String -Path 'C:\aeogenerator\.claude\skills\langchain-master\SKILL.md' -Pattern '^## Output format$'
 ```
@@ -690,6 +714,7 @@ git commit -m "feat(skills): define answer output template"
 ## Task 10: `README.md` overview
 
 **Files:**
+
 - Create: `C:\aeogenerator\.claude\skills\langchain-master\README.md`
 
 - [ ] **Step 1: Write `README.md`**
@@ -703,9 +728,10 @@ Project-local Claude Code skill that acts as a senior LangChain Python
 engineer for the `aeogenerator` project (Python AEO SaaS).
 
 ## Invoke
-
 ```
+
 Skill(skill="langchain-master", args="<your LangChain / LangGraph / LangSmith question>")
+
 ```
 
 ## What it does
@@ -736,6 +762,7 @@ Skill(skill="langchain-master", args="<your LangChain / LangGraph / LangSmith qu
 - [ ] **Step 2: Verify the file exists**
 
 Run (PowerShell):
+
 ```powershell
 Test-Path 'C:\aeogenerator\.claude\skills\langchain-master\README.md'
 ```
@@ -757,12 +784,14 @@ This task verifies the skill behaves as designed. No new files are
 created here.
 
 **Files:** (read-only checks)
+
 - Read: `C:\aeogenerator\.claude\skills\langchain-master\SKILL.md`
 - Read: `C:\aeogenerator\.claude\skills\langchain-master\memory\_index.json`
 
 - [ ] **Step 1: Sanity-check `SKILL.md` structure**
 
 Run (PowerShell):
+
 ```powershell
 Select-String -Path 'C:\aeogenerator\.claude\skills\langchain-master\SKILL.md' -Pattern '^## '
 ```
@@ -772,11 +801,13 @@ Expected: 7 matches, in order — Persona, Workflow, Topic-key normalization, Ca
 - [ ] **Step 2: First-call (cache miss) dry-run**
 
 Invoke (in a fresh chat turn):
+
 ```
 Skill(skill="langchain-master", args="LangGraph'ta human-in-the-loop breakpoint nasıl kurulur?")
 ```
 
 Expected behavior:
+
 - Skill loads `SKILL.md`.
 - `references/breakpoint-human-in-the-loop-langgraph.md` does not exist → step 2 falls through.
 - `_index.json` has no matching entry → step 3 falls through.
@@ -790,11 +821,13 @@ If any of these fail, fix `SKILL.md` and re-run.
 - [ ] **Step 3: Second-call (cache hit) dry-run**
 
 Invoke the **same question again**:
+
 ```
 Skill(skill="langchain-master", args="LangGraph'ta human-in-the-loop breakpoint nasıl kurulur?")
 ```
 
 Expected behavior:
+
 - No MCP calls.
 - `_index.json` shows `hit_count: 2` for the entry.
 - Reply body identical to the first call (minus any timestamp differences).
@@ -802,20 +835,24 @@ Expected behavior:
 - [ ] **Step 4: Third-call (promotion suggestion) dry-run**
 
 Invoke the same question a **third time**. Expected:
+
 - No MCP calls.
 - `hit_count: 3` in the index.
 - Reply contains the promotion suggestion paragraph:
+
   > 📌 **Promotion suggestion:** Bu konu 3 kez soruldu — `references/breakpoint-human-in-the-loop-langgraph.md` olarak kalıcılaştırayım mı? `evet` dersen dosyayı promote ederim, `hayır` dersen bir daha sormam.
 
 - [ ] **Step 5: Promotion accept dry-run**
 
 Reply `evet` in the next turn. Expected:
+
 - File copied: `references/breakpoint-human-in-the-loop-langgraph.md` now exists, identical to memory file.
 - `_index.json` shows `promoted: true` for the entry.
 
 - [ ] **Step 6: Post-promotion call dry-run**
 
 Invoke the same question a fourth time. Expected:
+
 - Step 2 hits `references/...md` immediately.
 - No memory read, no MCP call, no index update.
 - `hit_count` stays at `3` in `_index.json`.
@@ -823,6 +860,7 @@ Invoke the same question a fourth time. Expected:
 - [ ] **Step 7: Stale-refresh dry-run (optional, only if 30 days have passed in a real scenario)**
 
 Manually edit one memory entry's `cached_at` in both its file frontmatter and `_index.json` to 31 days ago. Re-invoke its question. Expected:
+
 - MCP queried again, file overwritten with fresh `cached_at`.
 - `hit_count` preserved from previous value.
 
@@ -845,3 +883,4 @@ git commit -m "chore(skills): mark langchain-master plan complete"
 - [ ] User `evet` creates `references/<topic>.md` and sets `promoted: true`.
 - [ ] Stale entries (>30 days) re-query MCP.
 - [ ] Every answer cites at least one MCP source.
+````

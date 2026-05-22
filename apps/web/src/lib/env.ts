@@ -1,5 +1,5 @@
-import { createEnv } from "@t3-oss/env-nextjs";
-import { z } from "zod";
+import { createEnv } from '@t3-oss/env-nextjs';
+import { z } from 'zod';
 
 /**
  * Validated environment variables for @aeogen/web.
@@ -18,18 +18,18 @@ export const env = createEnv({
       .string()
       .regex(
         /^sb_secret_/,
-        "must be a new-format Supabase secret key (sb_secret_...)",
+        'must be a new-format Supabase secret key (sb_secret_...)'
       )
       .min(20),
   },
   client: {
-    NEXT_PUBLIC_APP_URL: z.string().url().default("http://localhost:3000"),
+    NEXT_PUBLIC_APP_URL: z.string().url().default('http://localhost:3000'),
     NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
     NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z
       .string()
       .regex(
         /^sb_publishable_/,
-        "must be a new-format Supabase publishable key (sb_publishable_...)",
+        'must be a new-format Supabase publishable key (sb_publishable_...)'
       )
       .min(20),
   },

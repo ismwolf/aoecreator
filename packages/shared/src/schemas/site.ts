@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 /**
  * Site — a customer website registered under a workspace.
@@ -6,7 +6,7 @@ import { z } from "zod";
  * is generated from JSON Schema export of this Zod definition — DO NOT
  * hand-edit packages/shared/python/aeogen_shared/site.py.
  */
-export const SiteLanguageEnum = z.enum(["tr", "en", "de", "fr", "es"]);
+export const SiteLanguageEnum = z.enum(['tr', 'en', 'de', 'fr', 'es']);
 export type SiteLanguage = z.infer<typeof SiteLanguageEnum>;
 
 export const SiteSchema = z

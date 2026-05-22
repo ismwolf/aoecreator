@@ -40,11 +40,11 @@ No root `app/page.tsx` — the `(marketing)` group owns `/` to avoid route colli
 
 ## Scripts
 
-| Script | What it does |
-|---|---|
-| `dev` | `next dev --turbopack -p 3000` |
-| `build` | `next build` |
-| `start` | `next start -p 3000` |
-| `lint` | `eslint .` |
-| `typecheck` | `tsc --noEmit` |
-| `test` | placeholder (Vitest config arrives in a later task) |
+| Script      | What it does                                        |
+| ----------- | --------------------------------------------------- |
+| `dev`       | `next dev --turbopack -p 3000`                      |
+| `build`     | `next build`                                        |
+| `start`     | `next start -p 3000`                                |
+| `lint`      | `eslint .`                                          |
+| `typecheck` | `tsc --noEmit`                                      |
+| `test`      | placeholder (Vitest config arrives in a later task) |
