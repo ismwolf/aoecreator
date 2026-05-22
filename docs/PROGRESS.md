@@ -4,10 +4,10 @@
 > güncellenir. Manuel düzenleme yapılırsa orkestratör konfliği fark
 > eder ve kullanıcıya sorar.
 
-**Son güncelleme:** 2026-05-22 (A.T10+T11+T13 PR #17 açıldı — husky+lint-staged+prettier+commitlint+gitleaks+README. CI reviewer bekleniyor. packages/shared build fix: codegen:python build script'ten ayrıldı.)
-**Mevcut faz:** Faz 3 C (🔄 In progress: C.1 ✅, C.2 ✅, C.3 next) — Faz 0 ✅, Faz 2 B ✅ complete
+**Son güncelleme:** 2026-05-23 (C.3 OpenRouter LLM adapter tamamlandı. langchain-openai + OpenRouterLLM + 7 tests + mypy strict + ruff PASS. Sıradaki: C.4 Memory Backend.)
+**Mevcut faz:** Faz 3 C (🔄 In progress: C.1 ✅, C.2 ✅, C.3 ✅, C.4 next) — Faz 0 ✅, Faz 2 B ✅ complete
 **Mevcut alt-proje:** C — Agent Core SDK (7 sub-cycle decomposition)
-**Mevcut task:** C.3 — OpenRouter LLM adapter (`langchain-openai` dep + `OPENROUTER_API_KEY` Settings + `OpenRouterLLM` implementing `LLMProvider`)
+**Mevcut task:** C.4 — Memory Backend (`SupabaseMemoryBackend` implementing `MemoryBackend` — B.3 `agent_memory` tablosu)
 **Sıradaki milestone:** Faz 3 C complete (C.1 ✅ + C.2 ✅ + C.3 + C.4 + C.5 + C.6 + C.7)
 **Toplam ilerleme:** 26 / ~70 task (%37) — Faz 0 +11, A.T3-T6 +4, A.T8 +1, B.1+B.2+B.3 +3, C.1+C.2 +2; A.T7 + A.T9-T14 (now distributed JIT) deferred
 
@@ -79,10 +79,10 @@ Yapılacaklar (high-level master plan §4.A'dan):
   - OPENROUTER_API_KEY → will be added in C.3
   - REDIS_URL → will be added when Celery (Faz 4 D) ihtiyacı çıktığında
   - gen-types CI script → can join A.T12 CI work
-- [x] T10: Husky + commitlint + lint-staged — 🔄 PR #17 open (feature/A.T10-T11-T13-pre-commit-readme → dev). husky v9 + lint-staged (prettier+ESLint TS/JS, ruff Python) + commitlint + prettier + prettier-plugin-tailwindcss ^0.7.4 + eslint-config-prettier. All local gates green. CI reviewer pending.
-- [x] T11: `gitleaks` pre-commit — 🔄 PR #17 (same branch). .gitleaks.toml + pre-commit graceful-skip hook + gitleaks-action@v2 CI job.
+- [x] T10: Husky + commitlint + lint-staged — ✅ 2026-05-22 (PR #17 merged → `0488028`). husky v9 + lint-staged (prettier+ESLint TS/JS, ruff Python) + commitlint + prettier + prettier-plugin-tailwindcss ^0.7.4 + eslint-config-prettier. 3 reviewer cycles, 2 CI fix iterations (check:drift uv path). All gates green.
+- [x] T11: `gitleaks` pre-commit — ✅ 2026-05-22 (PR #17). .gitleaks.toml + pre-commit graceful-skip hook + gitleaks-action@v2 CI job.
 - [x] T12: `.github/workflows/ci.yml` (lint + test + typecheck) — ✅ 2026-05-22 (feature/A.T12-ci-workflow; PR #16 merged → `e2232ca`. Two parallel jobs: node-checks pnpm typecheck/lint/build/test + python-checks uv ruff/mypy/pytest. Review PASS, P2 duplicate-run fix applied.)
-- [x] T13: Initial README.md — 🔄 PR #17 (same branch). Root README.md: monorepo structure, tech stack, setup, dev workflow, commit conventions, branch strategy.
+- [x] T13: Initial README.md — ✅ 2026-05-22 (PR #17). Root README.md: monorepo structure, tech stack, setup, dev workflow, commit conventions, branch strategy.
 - [x] T14: Branch protection rules — ✅ 2026-05-22 (gh api ile uygulandı)
   - `main`: PR + 1 approval + dismiss stale + CI strict (node-checks + python-checks)
   - `test`: PR + 1 approval + CI strict
@@ -204,18 +204,24 @@ Yapılacaklar (high-level master plan §4.A'dan):
 - [x] `get_advisors('security')` lints: empty (langgraph schema framework-infra, no RLS warning fired)
 - [x] 3 schemas now on Cloud: `public`, `private`, `langgraph` (5 migrations total)
 
-### C.3 — OpenRouter LLM Adapter (⏳ Blocked by C.2)
+### C.3 — OpenRouter LLM Adapter (✅ 2026-05-23)
 
-Master plan §4.C.3:
+**PR:** feature/C.3-openrouter-llm-adapter (merged → dev)
 
-- [ ] `apps/api/src/aeogen/agents/providers/openrouter.py` — `OpenRouterLLM` class implementing `LLMProvider`
-- [ ] `langchain-openai>=0.3,<0.4` dep
-- [ ] `Settings` extension: `OPENROUTER_API_KEY: SecretStr`, `OPENROUTER_BASE_URL` (default `https://openrouter.ai/api/v1`)
-- [ ] Per-agent model override (`default_llm` ClassVar) + fallback chain via `extra_body={"route": "fallback", "models": [...]}`
-- [ ] Cost extraction from response headers/metadata
-- [ ] Negative tests: API error → exception, model unavailable → fallback used
+- [x] `langchain-openai>=0.3,<0.4` dep added to `apps/api/pyproject.toml`
+- [x] `apps/api/src/aeogen/agents/core/llm.py` — `OpenRouterLLM` class implementing `LLMProvider` protocol (structural typing, no inheritance)
+- [x] Settings: `OPENROUTER_API_KEY: SecretStr` + `OPENROUTER_BASE_URL: HttpUrl` + `OPENROUTER_DEFAULT_MODEL: str`
+- [x] Per-call model override (`model=` kwarg), fallback chain via `extra_body={"route": "fallback", "models": [primary, *fallbacks]}`
+- [x] Token budget guard: warns at >32k estimated tokens (auto-summarize deferred to C.4+ when MemoryBackend available — TODO in llm.py)
+- [x] `cost_usd=None` (C.6 LangSmith telemetry will populate)
+- [x] `cast(AIMessage, ...)` for usage_metadata access (mypy strict compatible)
+- [x] 7 tests (happy path, model override + base_url assertion, fallback chain, APIError propagation, stream chunks, max_tokens forwarding, token budget warning)
+- [x] `conftest.py` + CI `python-checks` env updated with `OPENROUTER_API_KEY` placeholder
+- [x] All gates: mypy strict ✓ (`11 source files`) · ruff check+format ✓ · pytest 17/17 PASS
 
-### C.4 — Memory Backend (⏳ Blocked by C.3)
+**Review (aeogen-code-reviewer):** PASS — Protocol conformance ✓, SecretStr security ✓, fallback chain shape ✓, test coverage ✓. P2 findings addressed (base_url assertion + max_tokens test + auto-summarize TODO comment).
+
+### C.4 — Memory Backend (⏳ Unblocked — C.3 done)
 
 - [ ] `apps/api/src/aeogen/agents/providers/supabase_memory.py` — `SupabaseMemoryBackend` implementing `MemoryBackend` (B.3 `agent_memory` table)
 - [ ] Vector search via pgvector hybrid (embeddings → cosine + sparse jsonb)
@@ -547,5 +553,11 @@ Master plan §4.C.3:
   - packages/shared build: codegen:python ayrıldı (node-checks'te uv yok — generated files committed, check:drift validates)
   - Deviation: lint-staged.config.mjs per-package filter for ESLint (Windows Husky PATH issue)
   - All local gates: pnpm install ✓, typecheck ✓, lint ✓, build ✓, test ✓, prettier --check ✓, commitlint ✓, Python ruff+mypy+pytest ✓
-- **PR #17** → feature/A.T10-T11-T13-pre-commit-readme → dev (open, reviewer pending)
-- **Sıradaki:** PR #17 review PASS → merge → C.3 OpenRouter LLM adapter
+- **PR #17** → merged to dev (`0488028`). Feature branch deleted. 61 files, 2951 insertions.
+- **CI fix iterations (2):** (1) check:drift uv path → wrong working-directory `apps/api` vs `packages/shared`; (2) node-checks needs `packages/shared/uv.lock` for datamodel-code-generator. Both fixed in-branch.
+- **Sıradaki:** C.3 — OpenRouter LLM adapter
+
+### 2026-05-23
+
+- **C.3 ✅ OpenRouter LLM adapter** — `OpenRouterLLM(LLMProvider)` via `langchain-openai` + `ChatOpenAI` pointed at `openrouter.ai/api/v1`. `langchain-openai>=0.3,<0.4` dep added. Settings: `openrouter_api_key: SecretStr` + `openrouter_base_url: HttpUrl` + `openrouter_default_model: str`. Fallback chain via `extra_body={"route": "fallback", "models": [...]}`. Token budget warning >32k (auto-summarize deferred to C.4+). 7 tests PASS, mypy strict PASS, ruff PASS. Code review: PASS (P2 findings addressed — base_url assertion + max_tokens test + TODO comment).
+- **Sıradaki:** C.4 — Memory Backend (`SupabaseMemoryBackend` implementing `MemoryBackend`, B.3 `agent_memory` tablosu + pgvector hybrid search)
