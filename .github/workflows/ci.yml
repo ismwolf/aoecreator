@@ -53,6 +53,16 @@ jobs:
           node-version: '22'
           cache: pnpm
 
+      - name: Install uv (needed for check:drift via codegen:python)
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: apps/api/uv.lock
+
+      - name: Install Python deps (apps/api)
+        run: uv sync --extra dev
+        working-directory: apps/api
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
