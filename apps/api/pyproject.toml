@@ -9,6 +9,7 @@ authors = [{ name = "aeogenerator team" }]
 dependencies = [
   "fastapi>=0.115.0,<0.116",
   "langchain-core>=0.3,<0.4",
+  "langchain-openai>=0.3,<0.4",
   "langgraph>=0.6,<0.7",
   "langgraph-checkpoint-postgres>=3.0,<3.1",
   "langsmith>=0.5,<0.6",

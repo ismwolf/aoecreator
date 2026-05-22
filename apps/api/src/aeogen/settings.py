@@ -66,6 +66,20 @@ class Settings(BaseSettings):
         repr=False,
     )
 
+    # OpenRouter (C.3). OPENROUTER_API_KEY is required; no prefix validator
+    # because OpenRouter keys don't follow a stable format.
+    openrouter_api_key: SecretStr = Field(
+        description="OpenRouter API key (sk-or-v1-... or any format).",
+    )
+    openrouter_base_url: HttpUrl = Field(
+        default="https://openrouter.ai/api/v1",  # type: ignore[assignment]
+        description="OpenRouter-compatible OpenAI API base URL.",
+    )
+    openrouter_default_model: str = Field(
+        default="anthropic/claude-sonnet-4.5",
+        description="Default model for agent LLM calls via OpenRouter.",
+    )
+
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:

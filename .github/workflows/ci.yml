@@ -101,6 +101,7 @@ jobs:
       SUPABASE_PUBLISHABLE_KEY: sb_publishable_placeholder_xxxxxxxxxxxxxxxxxxxx
       SUPABASE_SECRET_KEY: sb_secret_placeholder_xxxxxxxxxxxxxxxxxxxx
       DATABASE_URL: postgresql+asyncpg://placeholder:placeholder@localhost:5432/placeholder
+      OPENROUTER_API_KEY: test-openrouter-key-placeholder-xxxxxxxxxxxx
 
     steps:
       - name: Checkout
