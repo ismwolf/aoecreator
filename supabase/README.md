@@ -7,6 +7,7 @@ creation, type generation) flow through the **Supabase MCP server**
 (`supabase init`, `supabase login`) and as a fallback for MCP downtime.
 
 ## Live Cloud project
+
 - Project ref: `ngjlxlkdfgfhiookndpl`
 - URL: `https://ngjlxlkdfgfhiookndpl.supabase.co`
 - Tier: free (pauses after 7 days idle; visit Dashboard to unpause)
@@ -34,6 +35,7 @@ pwsh -c "pnpm exec supabase gen types typescript --linked > apps/web/src/lib/dat
 ## Migration workflow (MCP-first, Faz 2 B onwards)
 
 Per global CLAUDE.md (`~/.claude/rules/supabase.md`):
+
 > `apply_migration` via MCP does NOT create local .sql files —
 > always also write to `supabase/migrations/`.
 
@@ -59,6 +61,7 @@ CLI fallback (`pnpm exec supabase db push`) is acceptable for offline
 work but ALWAYS reconcile via MCP `list_migrations` on next online turn.
 
 ## Hard rules
+
 - NEVER edit Cloud schema via Dashboard SQL Editor.
 - NEVER commit `supabase/.env`, `.temp/`, `.branches/`.
 - NEVER use `@supabase/auth-helpers-nextjs` — deprecated. Use `@supabase/ssr`.

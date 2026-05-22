@@ -34,7 +34,7 @@ The `aeogenerator` project will be built on the LangChain Python stack
 - **G3**: A file-based cache under `memory/` keyed by topic, with
   `cached_at` timestamps and 30-day TTL.
 - **G4**: A hybrid promotion mechanism: once a cache entry's hit count
-  reaches 3, the skill *suggests* promoting it to `references/`; the user
+  reaches 3, the skill _suggests_ promoting it to `references/`; the user
   approves before the move.
 - **G5**: All answers cite the MCP source path/URL they were synthesized
   from, so the user can verify.
@@ -112,6 +112,7 @@ The skill instructs the caller to adopt this persona when answering:
 ```
 
 **`promoted` field** accepts three values:
+
 - `false` — not yet promoted, skill may suggest at hit_count ≥ 3
 - `true` — already promoted; `references/<topic-key>.md` exists
 - `"declined"` — user said no to promotion; skill never suggests again
@@ -199,19 +200,19 @@ returns the synthesized answer.
 
 - **R1: LangChain doc churn.** LangChain APIs evolve fast. 30-day TTL
   mitigates but does not eliminate stale guidance.
-  *Mitigation:* TTL + always-cite-source forces the user to see the doc
+  _Mitigation:_ TTL + always-cite-source forces the user to see the doc
   link, can spot-check.
 - **R2: Topic-key drift.** Two semantically similar questions might get
   different slugs and bypass the cache.
-  *Mitigation:* skill normalizes (lowercase, strip stopwords, sort
+  _Mitigation:_ skill normalizes (lowercase, strip stopwords, sort
   significant terms) before slugging. Accept some miss rate as v1.
 - **R3: `_index.json` corruption.** If a write is interrupted, index can
   be malformed.
-  *Mitigation:* skill validates JSON on read; on parse error, reinitializes
+  _Mitigation:_ skill validates JSON on read; on parse error, reinitializes
   index from `memory/*.md` frontmatter (recoverable).
 - **R4: Promotion suggestion noise.** If skill nags every 3rd hit, becomes
   annoying.
-  *Mitigation:* skill only suggests once per entry; if user says no, sets
+  _Mitigation:_ skill only suggests once per entry; if user says no, sets
   `promoted: "declined"` and never asks again.
 
 ## Open Questions
@@ -223,7 +224,7 @@ None at this gate — all earlier clarifying questions answered.
 1. `Skill(skill="langchain-master", args="...")` returns an opinionated
    answer formatted with the senior persona + sources footer.
 2. First call for a topic queries MCP and writes `memory/<topic-key>.md`
-   + updates `_index.json`.
+   - updates `_index.json`.
 3. Second call for the same topic within 30 days reads from
    `memory/<topic-key>.md` and increments `hit_count` — does NOT call
    MCP.

@@ -20,6 +20,7 @@ Successors: Faz 2 G, Faz 3 C, Faz 4 D
 ### T0 — Pre-flight pgvector check (~1 min)
 
 **Tool call:**
+
 ```
 mcp__supabase__list_extensions()
 ```
@@ -35,6 +36,7 @@ If `installed_version is null` → migration will install it. If already install
 **File created:** `supabase/migrations/20260519010000_b3_agent_sdk.sql`
 
 Order:
+
 1. `create extension if not exists vector with schema extensions;`
 2. **4 table CREATE** in dependency order: `agent_memory`, `agent_skills`, `embeddings` (depends on `pages` + `workspaces`), `audit_log` (depends on `organizations`, `workspaces`, `auth.users`)
 3. **Unique partial indexes** (3):
@@ -70,6 +72,7 @@ mcp__supabase__apply_migration(
 ```
 
 If error:
+
 - **`vector` extension not available** → STOP (T0 should have caught)
 - **`private.is_org_admin` missing** → B.1 not fully present; STOP, escalate
 - **Syntax error** → fix T1 file, re-apply (MCP atomic rollback on failure)
@@ -95,6 +98,7 @@ mcp__supabase__execute_sql("""
 ```
 
 **Expected:**
+
 - 13 tables in public; B.3's 4 with `rls_enabled=true`
 - Advisors: `{"lints": []}`
 - `vector` extension has `installed_version != null`
@@ -132,6 +136,7 @@ All must exit 0. Code-writer reports last 10 lines of each.
 ### T6 — Commit + push + PR (~5 min)
 
 Stage:
+
 - `supabase/migrations/20260519010000_b3_agent_sdk.sql`
 - `apps/web/src/lib/database.types.ts`
 - `docs/specs/2026-05-19-faz2b-b3-agent-sdk-spec.md`
@@ -140,6 +145,7 @@ Stage:
 Do NOT stage `docs/PROGRESS.md` — orchestrator updates in T7.
 
 Commit:
+
 ```
 feat(db): B.3 agent SDK + pgvector — memory, skills, embeddings, audit_log (Faz 2 B.3, closes Faz 2 B)
 

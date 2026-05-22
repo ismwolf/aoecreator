@@ -1,0 +1,25 @@
+title = "aeogenerator gitleaks config"
+
+[extend]
+# Use gitleaks default ruleset as base
+useDefault = true
+
+[allowlist]
+description = "Test fixtures, example keys, placeholders"
+regexes = [
+  # Supabase placeholder keys used in CI env and .env.example files
+  '''sb_publishable_placeholder_''',
+  '''sb_secret_placeholder_''',
+  # pytest / .env.example dummy values
+  '''placeholder''',
+]
+paths = [
+  # Example env files are safe by definition
+  '''.env.example''',
+  '''.env.test''',
+  # Lock files contain hashes that pattern-match as secrets
+  '''pnpm-lock\.yaml''',
+  '''uv\.lock''',
+  # Generated Supabase types — no secrets, only schema
+  '''apps/web/src/lib/database\.types\.ts''',
+]

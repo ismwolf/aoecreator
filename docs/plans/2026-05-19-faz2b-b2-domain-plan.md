@@ -37,6 +37,7 @@ Contents follow the spec exactly. Order:
    - `scores_workspace_id_idx`, `scores_page_id_idx`, `scores_run_id_idx`
 5. **Enable RLS** on all 5 tables (`alter table … enable row level security;`)
 6. **RLS policies** — 3 per table × 5 = 15 policies. Pattern (replace `<tbl>` with each table):
+
    ```sql
    create policy "<tbl>_select" on public.<tbl>
      for select to authenticated
@@ -51,6 +52,7 @@ Contents follow the spec exactly. Order:
      using (workspace_id in (select private.user_workspace_ids()) and deleted_at is null)
      with check (workspace_id in (select private.user_workspace_ids()));
    ```
+
 7. **moddatetime triggers** (5 — one per table)
 
 **Verification:** file exists, SQL syntactically valid. Can dry-run via `mcp__supabase__execute_sql` with a `select` after each statement before committing, but B.1 showed apply_migration's atomicity is sufficient.
@@ -60,6 +62,7 @@ Contents follow the spec exactly. Order:
 ### T2 — Apply migration via MCP `apply_migration` (~3 min)
 
 **Tool call:**
+
 ```
 mcp__supabase__apply_migration(
   name="b2_domain",
@@ -68,11 +71,13 @@ mcp__supabase__apply_migration(
 ```
 
 If error:
+
 - **Syntax error** → fix SQL in T1 file, re-apply (MCP doesn't store the partial state on failure — atomic rollback)
 - **`private` schema not found** → B.1 helpers not present; STOP, recheck B.1 merged
 - **`workspace_id` FK failure** → workspaces table missing or wrong column name; STOP
 
 **Verification:**
+
 - MCP returns success
 - `mcp__supabase__list_migrations()` shows `b2_domain` in the list
 
@@ -81,12 +86,14 @@ If error:
 ### T3 — Verify schema + RLS state (~3 min)
 
 **Tool calls:**
+
 ```
 mcp__supabase__list_tables(schemas=["public"], verbose=true)
 mcp__supabase__get_advisors(type="security")
 ```
 
 **Expected:**
+
 - `list_tables` returns 9 tables: B.1's 4 + B.2's 5 (`sites`, `pages`, `analysis_runs`, `agent_executions`, `scores`)
 - Each B.2 table shows `rls_enabled: true`
 - Each B.2 table has 3 policies (SELECT, INSERT, UPDATE)
@@ -100,6 +107,7 @@ If advisors show ANY `level: "ERROR"` or `level: "WARN"` → STOP, fix in a foll
 ### T4 — Regenerate `database.types.ts` via MCP (~2 min)
 
 **Tool call:**
+
 ```
 mcp__supabase__generate_typescript_types()
 ```
@@ -125,6 +133,7 @@ All must pass. Build proves env.ts + database.types.ts integrate cleanly (no con
 ### T6 — Commit + push + PR (~5 min)
 
 Stage:
+
 - `supabase/migrations/20260519000000_b2_domain.sql` (new)
 - `apps/web/src/lib/database.types.ts` (modified — 9 tables now)
 - `docs/specs/2026-05-19-faz2b-b2-domain-spec.md` (new)
@@ -132,6 +141,7 @@ Stage:
 - `docs/PROGRESS.md` (updated in T7)
 
 Commit message:
+
 ```
 feat(db): B.2 domain entities — sites, pages, runs, executions, scores (Faz 2 B.2)
 

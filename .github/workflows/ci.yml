@@ -52,7 +52,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: '22'
           cache: pnpm
 
       - name: Install dependencies
@@ -63,6 +63,9 @@ jobs:
 
       - name: Lint (workspace)
         run: pnpm -r lint
+
+      - name: Format check (prettier)
+        run: pnpm prettier --check .
 
       - name: Build (workspace)
         run: pnpm -r build
@@ -115,3 +118,19 @@ jobs:
 
       - name: Test (pytest)
         run: uv run pytest -v
+
+  gitleaks:
+    name: Secret scan (gitleaks)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_CONFIG: .gitleaks.toml

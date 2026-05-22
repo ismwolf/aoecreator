@@ -1,0 +1,23 @@
+# Build outputs
+.next/
+dist/
+out/
+
+# Lock files — reformatting them is destructive
+pnpm-lock.yaml
+uv.lock
+
+# Generated files
+apps/web/src/lib/database.types.ts
+packages/shared/python/
+
+# Python source — ruff owns formatting here
+*.py
+
+# Supabase local artifacts
+supabase/.temp/
+supabase/.branches/
+
+# Misc
+.claude/
+coverage/

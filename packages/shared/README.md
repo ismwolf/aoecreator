@@ -3,7 +3,7 @@
 Cross-language DTOs for the aeogenerator monorepo.
 
 **Zod (TypeScript) is the source of truth.** Pydantic v2 models for the
-Python side are *generated* from JSON Schema emitted from those Zod
+Python side are _generated_ from JSON Schema emitted from those Zod
 definitions. There are no hand-maintained Python schemas — every change
 starts in `src/schemas/*.ts` and propagates outward.
 
@@ -42,19 +42,23 @@ packages/shared/
 ## Add a new schema (the whole workflow)
 
 1. **Define the Zod schema** in `src/schemas/<thing>.ts`:
+
    ```ts
-   import { z } from "zod";
-   export const ThingSchema = z.object({
-     id: z.uuid(),
-     name: z.string().min(1).max(120),
-   }).strict();
+   import { z } from 'zod';
+   export const ThingSchema = z
+     .object({
+       id: z.uuid(),
+       name: z.string().min(1).max(120),
+     })
+     .strict();
    export type Thing = z.infer<typeof ThingSchema>;
    ```
 
 2. **Re-export it** in `src/index.ts`:
+
    ```ts
-   export { ThingSchema } from "./schemas/thing.js";
-   export type { Thing } from "./schemas/thing.js";
+   export { ThingSchema } from './schemas/thing.js';
+   export type { Thing } from './schemas/thing.js';
    ```
 
 3. **Register it for codegen** in `src/scripts/emit-json-schema.ts` and
@@ -62,9 +66,11 @@ packages/shared/
    `JOBS` arrays).
 
 4. **Regenerate Python**:
+
    ```powershell
    pnpm --filter @aeogen/shared build
    ```
+
    This runs three steps in order: `tsc` → `emit-json-schema` →
    `codegen-pydantic`. The Pydantic file lands at
    `python/aeogen_shared/thing.py` with a `# DO NOT EDIT` header.
@@ -94,9 +100,9 @@ packages/shared/
 ## TS consumer pattern (apps/web)
 
 ```ts
-import { SiteSchema, type Site } from "@aeogen/shared";
+import { SiteSchema, type Site } from '@aeogen/shared';
 
-const parsed = SiteSchema.parse(rawJson);  // throws on invalid input
+const parsed = SiteSchema.parse(rawJson); // throws on invalid input
 //    ^^ Site
 ```
 
@@ -128,7 +134,7 @@ install is needed.
   the current Zod source would produce. Wired into CI (A.T12) and as a
   pre-commit hook (A.T10).
 - **JSON Schema as the wire format.** The intermediate `dist/schemas/
-  *.schema.json` files are language-neutral; any consumer (rust,
+*.schema.json` files are language-neutral; any consumer (rust,
   go, openapi) can be added later without changing the Zod source.
 
 ## Drift detection
@@ -147,8 +153,8 @@ so a PR cannot land with stale generated Python.
 
 ## Build script timing
 
-| Hook                       | Status                          |
-| -------------------------- | ------------------------------- |
-| `pnpm --filter ... build`  | Available now (this task, A.T6) |
-| Husky pre-commit           | Wired in A.T10                  |
-| GitHub Actions CI gate     | Wired in A.T12                  |
+| Hook                      | Status                          |
+| ------------------------- | ------------------------------- |
+| `pnpm --filter ... build` | Available now (this task, A.T6) |
+| Husky pre-commit          | Wired in A.T10                  |
+| GitHub Actions CI gate    | Wired in A.T12                  |

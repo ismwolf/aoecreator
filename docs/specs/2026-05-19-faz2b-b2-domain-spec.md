@@ -143,6 +143,7 @@ create unique index scores_page_technique_run_active_uq
 `alter table … enable row level security;` her tabloda. Predicates B.1 helper'larını kullanır.
 
 Tüm 5 tablo aynı pattern:
+
 - **SELECT:** `workspace_id in (select private.user_workspace_ids()) and deleted_at is null`
 - **INSERT:** `with check (workspace_id in (select private.user_workspace_ids()))`
 - **UPDATE:** `using (...) with check (...)` — SELECT pattern + WITH CHECK aynı
@@ -171,6 +172,7 @@ create index scores_run_id_idx            on public.scores(run_id) where deleted
 ### 4. moddatetime triggers
 
 B.1 pattern'i 5 tabloya genişlet:
+
 ```sql
 create trigger handle_updated_at before update on public.sites
   for each row execute function extensions.moddatetime(updated_at);

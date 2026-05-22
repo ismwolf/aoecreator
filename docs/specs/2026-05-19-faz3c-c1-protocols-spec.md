@@ -559,6 +559,7 @@ def test_agent_context_immutable() -> None:
 ### 8. Dependency pins (`apps/api/pyproject.toml`)
 
 Add to `[project.dependencies]`:
+
 ```toml
 dependencies = [
     # ... existing fastapi, pydantic, etc. ...
@@ -574,6 +575,7 @@ dependencies = [
 ### 9. mypy + ruff sanity
 
 After files written, run:
+
 ```powershell
 cd apps/api
 uv sync  # pulls langchain-core, langgraph, langsmith
