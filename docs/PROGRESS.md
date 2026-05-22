@@ -4,10 +4,7 @@
 > güncellenir. Manuel düzenleme yapılırsa orkestratör konfliği fark
 > eder ve kullanıcıya sorar.
 
-**Son güncelleme:** 2026-05-20 (Faz 3 C.2 LangGraph checkpoint + `langgraph`
-schema merged — `AsyncPostgresSaver` helper + DSN search_path rewrite +
-DATABASE_URL Settings + 2 contract tests, 10 total pytest pass. 3 schemas
-on Cloud: public+private+langgraph.)
+**Son güncelleme:** 2026-05-22 (A.T12 CI pipeline merged — `.github/workflows/ci.yml` PR #16 → `e2232ca`. node-checks + python-checks paralel. Sıradaki: C.3 OpenRouter LLM adapter.)
 **Mevcut faz:** Faz 3 C (🔄 In progress: C.1 ✅, C.2 ✅, C.3 next) — Faz 0 ✅, Faz 2 B ✅ complete
 **Mevcut alt-proje:** C — Agent Core SDK (7 sub-cycle decomposition)
 **Mevcut task:** C.3 — OpenRouter LLM adapter (`langchain-openai` dep + `OPENROUTER_API_KEY` Settings + `OpenRouterLLM` implementing `LLMProvider`)
@@ -83,7 +80,7 @@ Yapılacaklar (high-level master plan §4.A'dan):
   - gen-types CI script → can join A.T12 CI work
 - [ ] T10: Husky + commitlint + lint-staged
 - [ ] T11: `gitleaks` pre-commit
-- [ ] T12: `.github/workflows/ci.yml` (lint + test + typecheck) — **HIGH PRIORITY** (PR'lar şu an CI'sız merge oluyor, risk)
+- [x] T12: `.github/workflows/ci.yml` (lint + test + typecheck) — ✅ 2026-05-22 (feature/A.T12-ci-workflow; PR #16 merged → `e2232ca`. Two parallel jobs: node-checks pnpm typecheck/lint/build/test + python-checks uv ruff/mypy/pytest. Review PASS, P2 duplicate-run fix applied.)
 - [ ] T13: Initial README.md
 - [ ] T14: Branch protection rules (manuel GitHub UI):
   - `main`: PR + 1 approval + require CI + dismiss stale
