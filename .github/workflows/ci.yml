@@ -57,11 +57,11 @@ jobs:
         uses: astral-sh/setup-uv@v6
         with:
           enable-cache: true
-          cache-dependency-glob: apps/api/uv.lock
+          cache-dependency-glob: packages/shared/uv.lock
 
-      - name: Install Python deps (apps/api)
+      - name: Install Python deps (packages/shared)
         run: uv sync --extra dev
-        working-directory: apps/api
+        working-directory: packages/shared
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
