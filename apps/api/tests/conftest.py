@@ -23,6 +23,10 @@ os.environ.setdefault("SUPABASE_SECRET_KEY", "sb_secret_test_" + "x" * 20)
 os.environ.setdefault("DATABASE_URL", "postgresql://test:test@localhost:5432/test")
 # C.3: OpenRouter API key — not a real key, tests mock ChatOpenAI anyway
 os.environ.setdefault("OPENROUTER_API_KEY", "test-openrouter-key-" + "x" * 20)
+# D.6: Upstash Redis broker URL — fake, tests don't touch the broker
+os.environ.setdefault("REDIS_URL", "rediss://:test@localhost:6380")
+# D.4: Modal embedding endpoint — fake, tests mock httpx
+os.environ.setdefault("MODAL_EMBED_URL", "https://test--aeogen-embed.modal.run")
 
 from aeogen.main import create_app
 from aeogen.settings import get_settings

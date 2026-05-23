@@ -7,7 +7,15 @@ Redis / DATABASE_URL follow in A.T9 alongside their first real consumers.
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import AliasChoices, Field, HttpUrl, PostgresDsn, SecretStr, field_validator
+from pydantic import (
+    AliasChoices,
+    Field,
+    HttpUrl,
+    PostgresDsn,
+    RedisDsn,
+    SecretStr,
+    field_validator,
+)
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -79,6 +87,25 @@ class Settings(BaseSettings):
         default="anthropic/claude-sonnet-4.5",
         description="Default model for agent LLM calls via OpenRouter.",
     )
+
+    # Redis / Celery (D.6). Upstash TLS URL.
+    redis_url: RedisDsn = Field(
+        ...,
+        validation_alias=AliasChoices("REDIS_URL"),
+        description="Upstash Redis TLS URL (rediss://:password@host:6380).",
+        repr=False,
+    )
+
+    # Modal BGE-M3 embedding service (D.4).
+    modal_embed_url: HttpUrl = Field(
+        ...,
+        validation_alias=AliasChoices("MODAL_EMBED_URL"),
+        description="Modal BGE-M3 /embed endpoint URL.",
+    )
+
+    # Crawl knobs (D.1).
+    crawl_top_pages: int = Field(default=50, ge=1, le=500)
+    crawl_rate_limit_rps: float = Field(default=1.0, ge=0.1, le=10.0)
 
 
 @lru_cache(maxsize=1)
