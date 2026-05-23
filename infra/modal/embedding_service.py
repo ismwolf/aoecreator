@@ -1,39 +1,48 @@
-"""Modal BGE-M3 embedding service — serverless GPU endpoint (D.4).
+"""Modal BGE-M3 embedding service — serverless GPU endpoint.
 
 Deploy: modal deploy infra/modal/embedding_service.py
 Endpoint: POST /embed {"texts": [...]} -> {"embeddings": [[...]]}
-GPU: L4 (1024-dim BGE-M3, multilingual)
-
-NOT part of apps/api. Lives in the Modal cloud. Has its own dependency stack
-(modal, FlagEmbedding, torch). No uv / pytest integration — deployment is
-exclusively via `modal deploy`.
+GPU: L4 (BAAI/bge-m3, 1024-dim, multilingual)
 """
 
 from __future__ import annotations
 
 import modal
+from pydantic import BaseModel
 
 app = modal.App("aeogen-embed")
 
-_image = modal.Image.debian_slim(python_version="3.12").pip_install(
-    "FlagEmbedding>=1.4",
-    "torch>=2.3",
-    "transformers>=4.40",
-    "numpy>=1.26",
+_image = (
+    modal.Image.debian_slim(python_version="3.12")
+    .pip_install(
+        "FlagEmbedding>=1.4",
+        "torch>=2.3",
+        "transformers>=4.40",
+        "numpy>=1.26",
+        "pydantic>=2.0",
+    )
 )
 
 MODEL_NAME = "BAAI/bge-m3"
 _BATCH_SIZE = 32
 
 
+class EmbedRequest(BaseModel):
+    texts: list[str]
+
+
+class EmbedResponse(BaseModel):
+    embeddings: list[list[float]]
+
+
 @app.cls(
     gpu="L4",
     image=_image,
     timeout=300,
-    scaledown_window=60,  # Keep warm for 60s after last request.
+    scaledown_window=60,
 )
 class EmbeddingService:
-    """BGE-M3 model loaded once per container; batches requests."""
+    """BGE-M3 model loaded once per container, handles batched embed requests."""
 
     @modal.enter()
     def load_model(self) -> None:
@@ -41,15 +50,14 @@ class EmbeddingService:
 
         self._model = BGEM3FlagModel(MODEL_NAME, use_fp16=True)
 
-    @modal.web_endpoint(method="POST")
-    def embed(self, request: dict) -> dict:  # type: ignore[type-arg]
-        texts: list[str] = request.get("texts", [])
-        if not texts:
-            return {"embeddings": []}
+    @modal.fastapi_endpoint(method="POST")
+    def embed(self, request: EmbedRequest) -> EmbedResponse:
+        if not request.texts:
+            return EmbedResponse(embeddings=[])
 
         results: list[list[float]] = []
-        for i in range(0, len(texts), _BATCH_SIZE):
-            batch = texts[i : i + _BATCH_SIZE]
+        for i in range(0, len(request.texts), _BATCH_SIZE):
+            batch = request.texts[i : i + _BATCH_SIZE]
             output = self._model.encode(
                 batch,
                 batch_size=_BATCH_SIZE,
@@ -61,4 +69,4 @@ class EmbeddingService:
             dense: list[list[float]] = output["dense_vecs"].tolist()
             results.extend(dense)
 
-        return {"embeddings": results}
+        return EmbedResponse(embeddings=results)

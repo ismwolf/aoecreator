@@ -13,70 +13,83 @@ os.environ.setdefault("MODAL_EMBED_URL", "https://test--aeogen-embed.modal.run")
 
 from aeogen.tasks.crawl import _run_crawl_pipeline
 
+_DB_URL = "postgresql://test:test@localhost/db"
+_SB_URL = "https://test.supabase.co"
+_SB_KEY = "sb_secret_test_key_placeholder_xxx"
+_EMBED_URL = "https://test--aeogen-embed.modal.run"
+
+
+def _pipeline_kwargs(site_id: str, run_id: str, max_pages: int = 5) -> dict:  # type: ignore[type-arg]
+    return {
+        "site_id": site_id,
+        "run_id": run_id,
+        "max_pages": max_pages,
+        "db_url": _DB_URL,
+        "supabase_url": _SB_URL,
+        "supabase_key": _SB_KEY,
+        "modal_embed_url": _EMBED_URL,
+        "rate_limit_rps": 100.0,
+    }
+
 
 @pytest.mark.asyncio
 async def test_run_crawl_pipeline_calls_spider() -> None:
-    """Pipeline calls spider.crawl with correct site_url."""
+    """Pipeline resolves site info, then calls spider.crawl with correct site_url."""
     site_id = str(uuid4())
     run_id = str(uuid4())
 
     mock_spider = MagicMock()
     mock_spider.crawl = AsyncMock(return_value=[])
-    mock_embedder = MagicMock()
-    mock_embedder.embed_batch = AsyncMock(return_value=[])
 
     with (
+        patch(
+            "aeogen.tasks.crawl._get_site_info",
+            new=AsyncMock(return_value=("https://example.com", "ws-uuid")),
+        ),
         patch("aeogen.tasks.crawl.SiteSpider", return_value=mock_spider),
-        patch("aeogen.tasks.crawl.ModalEmbedder", return_value=mock_embedder),
+        patch("aeogen.tasks.crawl.ModalEmbedder"),
         patch("aeogen.tasks.crawl._update_run_status", new_callable=AsyncMock),
         patch("aeogen.tasks.crawl._ingest_pages", new_callable=AsyncMock),
     ):
-        await _run_crawl_pipeline(
-            site_id=site_id,
-            site_url="https://example.com",
-            run_id=run_id,
-            max_pages=5,
-        )
+        await _run_crawl_pipeline(**_pipeline_kwargs(site_id, run_id))
 
     mock_spider.crawl.assert_awaited_once_with("https://example.com", max_pages=5)
 
 
 @pytest.mark.asyncio
-async def test_run_crawl_pipeline_updates_status_running() -> None:
-    """Pipeline sets status=running before crawling and completed after."""
+async def test_run_crawl_pipeline_updates_status_running_then_succeeded() -> None:
+    """Pipeline sets status=running then succeeded (not 'completed')."""
     site_id = str(uuid4())
     run_id = str(uuid4())
 
     mock_spider = MagicMock()
     mock_spider.crawl = AsyncMock(return_value=[])
-    mock_embedder = MagicMock()
-    mock_embedder.embed_batch = AsyncMock(return_value=[])
 
     status_calls: list[str] = []
 
-    async def fake_update_status(run_id: str, status: str) -> None:
+    async def fake_update(run_id: str, status: str, *, db_url: str) -> None:
         status_calls.append(status)
 
     with (
+        patch(
+            "aeogen.tasks.crawl._get_site_info",
+            new=AsyncMock(return_value=("https://example.com", "ws-uuid")),
+        ),
         patch("aeogen.tasks.crawl.SiteSpider", return_value=mock_spider),
-        patch("aeogen.tasks.crawl.ModalEmbedder", return_value=mock_embedder),
-        patch("aeogen.tasks.crawl._update_run_status", side_effect=fake_update_status),
+        patch("aeogen.tasks.crawl.ModalEmbedder"),
+        patch("aeogen.tasks.crawl._update_run_status", side_effect=fake_update),
         patch("aeogen.tasks.crawl._ingest_pages", new_callable=AsyncMock),
     ):
-        await _run_crawl_pipeline(
-            site_id=site_id,
-            site_url="https://example.com",
-            run_id=run_id,
-            max_pages=5,
-        )
+        await _run_crawl_pipeline(**_pipeline_kwargs(site_id, run_id))
 
     assert "running" in status_calls
-    assert "completed" in status_calls
+    assert "succeeded" in status_calls
+    assert "completed" not in status_calls  # 'completed' is not a valid CHECK value
 
 
 @pytest.mark.asyncio
-async def test_run_crawl_pipeline_sets_failed_on_error() -> None:
-    """Pipeline catches spider errors and sets status=failed."""
+async def test_run_crawl_pipeline_sets_failed_and_reraises_on_error() -> None:
+    """Pipeline marks failed AND re-raises so Celery retry fires."""
     site_id = str(uuid4())
     run_id = str(uuid4())
 
@@ -85,27 +98,27 @@ async def test_run_crawl_pipeline_sets_failed_on_error() -> None:
 
     status_calls: list[str] = []
 
-    async def fake_update_status(run_id: str, status: str) -> None:
+    async def fake_update(run_id: str, status: str, *, db_url: str) -> None:
         status_calls.append(status)
 
     with (
+        patch(
+            "aeogen.tasks.crawl._get_site_info",
+            new=AsyncMock(return_value=("https://example.com", "ws-uuid")),
+        ),
         patch("aeogen.tasks.crawl.SiteSpider", return_value=mock_spider),
         patch("aeogen.tasks.crawl.ModalEmbedder"),
-        patch("aeogen.tasks.crawl._update_run_status", side_effect=fake_update_status),
+        patch("aeogen.tasks.crawl._update_run_status", side_effect=fake_update),
+        pytest.raises(RuntimeError, match="network down"),
     ):
-        await _run_crawl_pipeline(
-            site_id=site_id,
-            site_url="https://example.com",
-            run_id=run_id,
-            max_pages=5,
-        )
+        await _run_crawl_pipeline(**_pipeline_kwargs(site_id, run_id))
 
     assert "failed" in status_calls
 
 
 @pytest.mark.asyncio
 async def test_ingest_pages_calls_embedder_and_writes_db() -> None:
-    """_ingest_pages calls embedder.embed_batch and writes to DB."""
+    """_ingest_pages calls embedder.embed_batch, uploads HTML, upserts page + embeddings."""
     from aeogen.crawl.spider import CrawledPage
     from aeogen.tasks.crawl import _ingest_pages
 
@@ -120,14 +133,18 @@ async def test_ingest_pages_calls_embedder_and_writes_db() -> None:
     mock_embedder = MagicMock()
     mock_embedder.embed_batch = AsyncMock(return_value=[[0.1] * 1024])
 
-    # Stub psycopg.AsyncConnection.connect so no real DB call happens.
-    mock_cursor = AsyncMock()
-    mock_conn = AsyncMock()
-    mock_conn.cursor = MagicMock(return_value=mock_cursor)
+    # Mock psycopg cursor — fetchone returns page_id for the page upsert
+    mock_cursor = MagicMock()
     mock_cursor.__aenter__ = AsyncMock(return_value=mock_cursor)
     mock_cursor.__aexit__ = AsyncMock(return_value=None)
+    mock_cursor.execute = AsyncMock()
+    mock_cursor.fetchone = AsyncMock(return_value={"id": "page-uuid-123"})
+
+    mock_conn = MagicMock()
     mock_conn.__aenter__ = AsyncMock(return_value=mock_conn)
     mock_conn.__aexit__ = AsyncMock(return_value=None)
+    mock_conn.cursor = MagicMock(return_value=mock_cursor)
+    mock_conn.commit = AsyncMock()
 
     with (
         patch("aeogen.tasks.crawl.PageParser") as mock_parser_cls,
@@ -136,6 +153,8 @@ async def test_ingest_pages_calls_embedder_and_writes_db() -> None:
             "aeogen.tasks.crawl.psycopg.AsyncConnection.connect",
             new=AsyncMock(return_value=mock_conn),
         ),
+        patch("aeogen.tasks.crawl.create_client"),
+        patch("aeogen.tasks.crawl.asyncio.to_thread", new_callable=AsyncMock),
     ):
         mock_parser = MagicMock()
         mock_parser.parse.return_value = {
@@ -169,7 +188,9 @@ async def test_ingest_pages_calls_embedder_and_writes_db() -> None:
             workspace_id="ws-456",
             run_id="run-789",
             embedder=mock_embedder,
-            db_url="postgresql://test:test@localhost/db",
+            db_url=_DB_URL,
+            supabase_url=_SB_URL,
+            supabase_key=_SB_KEY,
         )
 
     mock_embedder.embed_batch.assert_awaited_once_with(["Hello world"])
