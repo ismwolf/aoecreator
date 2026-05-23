@@ -102,6 +102,8 @@ jobs:
       SUPABASE_SECRET_KEY: sb_secret_placeholder_xxxxxxxxxxxxxxxxxxxx
       DATABASE_URL: postgresql+asyncpg://placeholder:placeholder@localhost:5432/placeholder
       OPENROUTER_API_KEY: test-openrouter-key-placeholder-xxxxxxxxxxxx
+      REDIS_URL: rediss://:placeholder@localhost:6380
+      MODAL_EMBED_URL: https://placeholder--aeogen-embed.modal.run
 
     steps:
       - name: Checkout
@@ -118,6 +120,9 @@ jobs:
 
       - name: Install dependencies (with dev extras)
         run: uv sync --extra dev
+
+      - name: Install Playwright browsers (Crawl4AI dep)
+        run: uv run playwright install --with-deps chromium
 
       - name: Lint (ruff check)
         run: uv run ruff check .

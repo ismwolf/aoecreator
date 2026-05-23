@@ -1,0 +1,9 @@
+# Requirements for infra/modal/embedding_service.py (Modal cloud, NOT apps/api).
+# These are installed via modal.Image.pip_install() inside the script —
+# this file exists for documentation / IDE hinting only.
+#
+# modal>=0.73
+# FlagEmbedding>=1.4
+# torch>=2.3
+# transformers>=4.40
+# numpy>=1.26
