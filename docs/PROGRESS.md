@@ -4,12 +4,12 @@
 > güncellenir. Manuel düzenleme yapılırsa orkestratör konfliği fark
 > eder ve kullanıcıya sorar.
 
-**Son güncelleme:** 2026-05-23 (Faz 3 C complete — C.1-C.7 ALL ✅. 44 tests, 95.9% coverage. Sıradaki: Faz 4 D — Crawl & Ingestion.)
-**Mevcut faz:** Faz 4 D (⏳ Blocked — starting) — Faz 0 ✅, Faz 2 B ✅, Faz 3 C ✅ complete
-**Mevcut alt-proje:** D — Crawl & Ingestion Pipeline
-**Mevcut task:** D.1 — Crawl4AI spider wrapper (sitemap + robots + rate limit)
-**Sıradaki milestone:** Faz 4 D complete (D.1 + D.2 + D.3)
-**Toplam ilerleme:** 33 / ~70 task (%47) — Faz 0 +11, A.T3-T6 +4, A.T8 +1, B.1+B.2+B.3 +3, C.1-C.7 +7; A.T7 + Docker deferred
+**Son güncelleme:** 2026-05-23 (Faz 4 D complete — D.1-D.7 ALL ✅. 72 tests, ruff+mypy clean. PR #23. Sıradaki: Faz 5 E — v1 GEO Agent Suite.)
+**Mevcut faz:** Faz 5 E (⏸ Blocked — starting) — Faz 0 ✅, Faz 2 B ✅, Faz 3 C ✅, Faz 4 D ✅ complete
+**Mevcut alt-proje:** E — v1 GEO Agent Suite
+**Mevcut task:** E.5 — Question-Intent Targeting (Analyzer + Generator)
+**Sıradaki milestone:** Faz 5 E complete (5 GEO teknik + Orchestrator)
+**Toplam ilerleme:** 40 / ~70 task (%57) — Faz 0 +11, A.T3-T6 +4, A.T8 +1, B.1+B.2+B.3 +3, C.1-C.7 +7, D.1-D.7 +7; A.T7 + Docker deferred
 
 ## Faz durumları
 
@@ -19,8 +19,8 @@
 | 1   | A — Foundation bootstrap           | ⏸ Blocked by Faz 0 | 1 hafta      | Spec henüz yazılmadı                                                                                                                                        |
 | 2   | B — Data layer + multi-tenancy     | ✅ Done            | 1 hafta      | 3/3 sub-cycles complete: B.1 ✅ + B.2 ✅ + B.3 ✅ (2026-05-19). 13 tables + pgvector + HNSW + 24 RLS policies. Faz 2 G (provision + invite) ayrı alt-proje. |
 | 3   | C — Agent Core SDK                 | ✅ Done            | 2 hafta      | C.1-C.7 ALL done (2026-05-23). 44 tests, 95.9% coverage. PRs #14-#22.                                                                                       |
-| 4   | D — Crawl & ingestion              | 🔄 In progress     | 1 hafta      | Crawl4AI + Modal embed. Unblocked 2026-05-23 after Faz 3 C complete.                                                                                        |
-| 5   | E — v1 GEO agent suite (5 teknik)  | ⏸ Blocked by Faz 4 | 3 hafta      | 5 Analyzer + 5 Generator + Orchestrator                                                                                                                     |
+| 4   | D — Crawl & ingestion              | ✅ Done            | 1 hafta      | D.1-D.7 ALL done (2026-05-23). 72 tests, ruff+mypy clean. PR #23. User actions: modal deploy + MODAL_EMBED_URL + REDIS_URL setup.                           |
+| 5   | E — v1 GEO agent suite (5 teknik)  | ⏳ Starting        | 3 hafta      | 5 Analyzer + 5 Generator + Orchestrator                                                                                                                     |
 | 6   | F + G — Dashboard + Auth (paralel) | ⏸ Blocked by Faz 5 | 2 hafta      | Next.js + Supabase Auth + Org                                                                                                                               |
 | 7   | H — Observability + Ops            | ⏸ Blocked by Faz 6 | 1 hafta      | LangSmith + Sentry + OTel                                                                                                                                   |
 | 8   | Closed beta                        | ⏸ Blocked by Faz 7 | 1 hafta      | 3-5 ajansla E2E test                                                                                                                                        |
@@ -269,21 +269,34 @@ Yapılacaklar (high-level master plan §4.A'dan):
 
 ---
 
-## Faz 4 (D) — Crawl & Ingestion Pipeline (⏸ Blocked)
+## Faz 4 (D) — Crawl & Ingestion Pipeline (✅ Done — 2026-05-23)
 
-**Spec/Plan:** Henüz yazılmadı.
+**Spec:** `docs/specs/2026-05-23-faz4d-crawl-ingestion-spec.md`
+**Plan:** `docs/plans/2026-05-23-faz4d-crawl-ingestion-plan.md`
+**PR:** [#23](https://github.com/ismwolf/aoecreator/pull/23) (merged → dev)
 
-- [ ] D.1: Crawl4AI spider wrapper (sitemap + robots + rate limit)
-- [ ] D.2: Schema.org + meta extractor
-- [ ] D.3: Semantic chunker (~512 token)
-- [ ] D.4: Modal BGE-M3 embedding service deploy
-- [ ] D.5: pgvector insert (`embeddings` tablosu) + sparse hybrid
-- [ ] D.6: Celery task `crawl_site(site_id)` + retry logic
-- [ ] D.7: HTML snapshot → Supabase Storage `crawls/<site_id>/<hash>.html`
+- [x] D.1: Crawl4AI spider wrapper (`crawl/spider.py`) — sitemap.xml parse (sitemapindex + urlset), rate-limited async crawl, `storage_path()` for Supabase paths
+- [x] D.2: Schema.org + meta extractor (`crawl/parser.py`) — stdlib HTMLParser, JSON-LD, OG tags, canonical URL, word count → `ParsedContent` TypedDict
+- [x] D.3: Semantic chunker (`crawl/chunker.py`) — tiktoken `cl100k_base`, 512-token heading-aware chunks, 50-token overlap → `TextChunk` TypedDict
+- [x] D.4: Modal BGE-M3 embedding service (`infra/modal/embedding_service.py`) — L4 GPU, BAAI/bge-m3 1024-dim, `@modal.fastapi_endpoint`, typed Pydantic models
+- [x] D.5: pgvector upsert (`tasks/crawl.py`) — `chunk_id`/`content`/`embedding::extensions.vector`/`embedding_sparse` — correct B.3 schema
+- [x] D.6: Celery task `crawl_site` (`tasks/crawl.py` + `celery_app.py`) — Upstash Redis TLS broker, max_retries=3 exponential backoff, re-raises for retry
+- [x] D.7: HTML snapshot → Supabase Storage `crawls/<site_id>/<hash>.html` via `asyncio.to_thread`
+- [x] Settings: `redis_url: RedisDsn`, `modal_embed_url: HttpUrl`, `crawl_top_pages`, `crawl_rate_limit_rps`
+- [x] CI: REDIS_URL + MODAL_EMBED_URL added to `python-checks` env block
+
+### Faz 4 D — COMPLETE ✅ (2026-05-23)
+
+- **7 sub-cycles** all done: D.1 spider + D.2 parser + D.3 chunker + D.4 Modal BGE-M3 + D.5 pgvector + D.6 Celery + D.7 Storage
+- **72 tests** — ruff clean, mypy strict clean (21 source files)
+- **User actions required (not blocking CI):**
+  - `modal deploy infra/modal/embedding_service.py` → set `MODAL_EMBED_URL` in `.env`
+  - Get Upstash Redis URL → set `REDIS_URL` in `.env`
+- PR: [#23](https://github.com/ismwolf/aoecreator/pull/23)
 
 ---
 
-## Faz 5 (E) — v1 GEO Agent Suite (⏸ Blocked)
+## Faz 5 (E) — v1 GEO Agent Suite (⏳ Starting)
 
 **Spec/Plan:** Her teknik için ayrı veya gruplanmış spec/plan.
 
@@ -586,3 +599,13 @@ Yapılacaklar (high-level master plan §4.A'dan):
 - **C.7 ✅ Integration tests + coverage** (PR #22) — 5 smoke tests: end-to-end Agent.run() (FakeLLM+FakeMemory+FakeSkills), callback wiring (CostTracker+LangSmithTraceHandler+AsyncMock db), Protocol isinstance @runtime_checkable (all 3 fakes), Supabase backend isinstance checks, ClassVar validation at class definition time. `pytest-cov>=7.1` dev dep added. `[tool.coverage.run]` omit `main.py` (lru_cache+pydantic_settings coverage conflict). `fail_under=80`. Final result: 44 tests, 95.9% coverage.
 - **Faz 3 C ✅ COMPLETE** — C.1-C.7 all merged (PRs #14-#22). 7 source modules + 7 test files. 44 unit tests, 95.9% coverage. mypy strict (13 src files) + ruff clean. Memory entry: `project_faz3c_complete.md`.
 - **Sıradaki:** Faz 4 D — Crawl & Ingestion Pipeline (D.1 Crawl4AI spider → D.2 schema.org extractor → D.3 chunker → D.4 Modal BGE-M3 → D.5 pgvector → D.6 Celery → D.7 Storage)
+- **D.1 ✅ Spider** — `crawl/spider.py`: Crawl4AI async spider; sitemap.xml parse (sitemapindex + urlset, `_SITEMAP_NS`); `_fetch_urls()` fallback to [site_url]; rate-limited; `storage_path(site_id, url)` = `crawls/<site_id>/<sha256[:16]>.html`. 8 tests PASS.
+- **D.2 ✅ Parser** — `crawl/parser.py`: stdlib `HTMLParser`; JSON-LD (all `<script type="application/ld+json">`), OG meta (og:title/description/type), canonical `<link>`, word count. `ParsedContent` TypedDict. 6 tests PASS.
+- **D.3 ✅ Chunker** — `crawl/chunker.py`: tiktoken `cl100k_base`; `_HEADING_RE = r"^(#{1,3})\s+(.+)$"` heading-aware split; 512-token max, 50-token overlap; `TextChunk` TypedDict with text/chunk_index/heading_context/token_count/start_char/end_char. 5 tests PASS.
+- **D.4 ✅ Modal Embedder** — `infra/modal/embedding_service.py`: BGE-M3 L4 GPU; `@modal.fastapi_endpoint(method="POST")` (NOT deprecated `@modal.web_endpoint`); typed `EmbedRequest`/`EmbedResponse` Pydantic models. `crawl/embedder.py`: `ModalEmbedder.embed_batch()` async httpx, batch_size=32. 4 tests PASS.
+- **D.5 ✅ pgvector** — `tasks/crawl.py` `_ingest_pages`: upsert `public.pages` RETURNING id first (prevents NULL FK); then INSERT `public.embeddings` (`chunk_id`/`content`/`embedding::extensions.vector(1024)`/`'{}'::jsonb` for `embedding_sparse`); `ON CONFLICT (page_id, chunk_id) WHERE deleted_at IS NULL`. Correct B.3 schema.
+- **D.6 ✅ Celery task** — `celery_app.py` + `tasks/crawl.py`: `crawl_site` task bound with max_retries=3, exponential backoff (60\*2^n); `_run_crawl_pipeline` re-raises after marking failed so `self.retry()` fires. `_update_run_status`: 'running' → `started_at=now()`, 'succeeded'/'failed'/'cancelled' → `finished_at=now()`.
+- **D.7 ✅ Supabase Storage** — HTML upload via `asyncio.to_thread(sb.storage.from_("crawls").upload, html_path, html_bytes, {content-type, upsert:true})`. `_get_site_info()` resolves real `site_url` + `workspace_id` from `public.sites`.
+- **P0/P1/P2 fixes** (code-reviewer round) — SIM117 nested-with fix in test; E501 SQL column line wrap; Modal `@fastapi_endpoint` API; all P0 schema violations resolved.
+- **Faz 4 D ✅ COMPLETE** — D.1-D.7 all merged PR #23. 72 tests (5 new crawl_task + 67 existing). mypy strict (21 src files) + ruff clean. User pending: `modal deploy` + MODAL_EMBED_URL + REDIS_URL.
+- **Sıradaki:** Faz 5 E — v1 GEO Agent Suite (E.5 Question-Intent → E.2 Structured Knowledge → E.11 AI-Readable Formatting → E.3 Entity-Based SEO → E.4 Citation Opt → E.O Orchestrator)
